@@ -160,7 +160,7 @@ namespace ScaleUI
             UIComponent infomenu = UIView.GetAView ().FindUIComponent ("InfoMenu");
 
             infomenu.transformPosition = new Vector2(fullscreenContainer.GetBounds().min.x, fullscreenContainer.GetBounds().max.y);
-            infomenu.relativePosition += new Vector3 (20.0f, 20.0f);
+            infomenu.relativePosition += new Vector3 (70.0f, 5.0f);
         }
         
         private void fixInfoViewsContainer ()
@@ -171,7 +171,7 @@ namespace ScaleUI
 
             infomenucontainer.pivot = UIPivotPoint.TopCenter;
             infomenucontainer.transformPosition = new Vector3 (infomenu.GetBounds ().center.x, infomenu.GetBounds ().min.y);
-            infomenucontainer.relativePosition += new Vector3 (0.0f, 5.0f);
+            infomenucontainer.relativePosition += new Vector3 (-6.0f, 7.0f);
         }
         
         private void fixPoliciesPanel ()
@@ -181,7 +181,6 @@ namespace ScaleUI
             
             List<int> li = new List<int> ();
             li.Add (DistrictPolicies.CITYPLANNING_POLICY_COUNT);
-            li.Add (DistrictPolicies.INDUSTRY_POLICY_COUNT);
             li.Add (DistrictPolicies.SERVICE_POLICY_COUNT);
             li.Add (DistrictPolicies.SPECIAL_POLICY_COUNT);
             li.Add (DistrictPolicies.TAXATION_POLICY_COUNT);
