@@ -19,9 +19,16 @@ namespace ScaleUI
 
         void Update()
         {
-            if (ModConfig.Instance.ConfigUpdated) {
+            if (ModConfig.Instance.isApplyBtn) {
                 changeScale(ModConfig.Instance.scale);
                 ModConfig.Instance.ConfigUpdated = false;
+                ModConfig.Instance.isApplyBtn = false;
+            }
+
+            if (ModConfig.Instance.isResetBtn)
+            {
+                SetDefaultScale();
+                ModConfig.Instance.isResetBtn = false;
             }
         }
 
@@ -33,7 +40,7 @@ namespace ScaleUI
                 DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, "ScaleUI: "+ex.ToString());
             }
             try {
-                FixEverything ();
+                FixEverything();
             } catch (Exception ex) {
                 DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, "ScaleUI: "+ex.ToString());
             }
