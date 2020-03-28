@@ -60,13 +60,10 @@
     <Compile Include="ModConfig.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="ReflectionUtils.cs" />
-    <Compile Include="IScaleUI.cs" />
-    <Compile Include="CorralScaleUI.cs" />
     <Compile Include="ScaleUIMod.cs" />
     <Compile Include="ScaleUILoader.cs" />
     <Compile Include="MakeCameraFullscreen.cs" />
     <Compile Include="RedirectionHelper.cs" />
-    <Compile Include="ScaleUIPanel.cs" />
     <Compile Include="ScaleUI.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

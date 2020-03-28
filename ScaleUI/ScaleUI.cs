@@ -6,13 +6,7 @@ using UnityEngine;
 namespace ScaleUI {
     public class ScaleUI : MonoBehaviour {
         bool isInitialized;
-        IScaleUI scaleUIgui;
         float thumbnailbarY = 0f;
-        GameObject corral;
-
-        void OnDestroy() {
-            scaleUIgui.Destroy();
-        }
 
         void Update() {
             if (!isInitialized || ModConfig.Instance.isApplyBtn) {
@@ -30,28 +24,12 @@ namespace ScaleUI {
 
         void Start() {
             try {
-                InitUI();
-            } catch (Exception ex) {
-                DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, "ScaleUI: " + ex.ToString());
-            }
-            try {
                 FixEverything();
             } catch (Exception ex) {
                 DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, "ScaleUI: " + ex.ToString());
             }
         }
-
-        void InitUI() {
-            corral = GameObject.Find("CorralRegistrationGameObject");
-            if (corral == null) {
-                //use default ui
-                UIView v = UIView.GetAView();
-
-                scaleUIgui = (ScaleUIPanel)v.AddUIComponent(typeof(ScaleUIPanel));
-            } else {
-                scaleUIgui = new CorralScaleUI(corral);
-            }
-        }
+        
         public void ChangeScale(float scale) {
             UIView.GetAView().scale = scale;
             FixEverything();
@@ -115,7 +93,7 @@ namespace ScaleUI {
                 FixPoliciesPanel();
                 FixUnlockingPanel();
 
-                scaleUIgui.FixUI();
+                //scaleUIgui.FixUI();
             } catch (Exception ex) {
             }
         }
