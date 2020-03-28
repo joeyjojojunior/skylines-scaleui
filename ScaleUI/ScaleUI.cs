@@ -17,6 +17,14 @@ namespace ScaleUI
             scaleUIgui.Destroy ();
         }
 
+        void Update()
+        {
+            if (ModConfig.Instance.ConfigUpdated) {
+                changeScale(ModConfig.Instance.scale);
+                ModConfig.Instance.ConfigUpdated = false;
+            }
+        }
+
         void Start ()
         {
             try {
@@ -100,6 +108,12 @@ namespace ScaleUI
                     MakeCameraFullscreen.Deinitialize ();
                 }
             }
+        }
+        
+        public void changeScale(float scale)
+        {
+            UIView.GetAView().scale = scale;
+            FixEverything();
         }
 
         private bool cameraIsFullscreen ()

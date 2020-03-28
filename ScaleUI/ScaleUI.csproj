@@ -44,6 +44,7 @@
     <Reference Include="ICities">
       <HintPath>H:\Games\SteamLibrary\steamapps\common\Cities_Skylines\Cities_Data\Managed\ICities.dll</HintPath>
     </Reference>
+    <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
       <HintPath>H:\Games\SteamLibrary\steamapps\common\Cities_Skylines\Cities_Data\Managed\UnityEngine.dll</HintPath>
     </Reference>
@@ -56,6 +57,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="ModConfig.cs" />
+    <Compile Include="Configuration.cs" />
     <Compile Include="ReflectionUtils.cs" />
     <Compile Include="IScaleUI.cs" />
     <Compile Include="CorralScaleUI.cs" />
