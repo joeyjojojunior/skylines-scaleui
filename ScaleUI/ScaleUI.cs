@@ -40,12 +40,6 @@ namespace ScaleUI {
             FixEverything();
         }
 
-        public void Keyhandle(EventType eventType, KeyCode keyCode, EventModifiers modifiers) {
-            if (eventType == EventType.KeyDown && modifiers == EventModifiers.Control && (keyCode == KeyCode.Alpha0 || keyCode == KeyCode.Keypad0)) {
-                SetDefaultScale();
-            }
-        }
-
         private void FixEverything() {
             FixCamera();
             FixUIPositions();
@@ -92,9 +86,8 @@ namespace ScaleUI {
                 FixInfoViewsContainer();
                 FixPoliciesPanel();
                 FixUnlockingPanel();
-
-                //scaleUIgui.FixUI();
             } catch (Exception ex) {
+                DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, "ScaleUI: " + ex.ToString());
             }
         }
 

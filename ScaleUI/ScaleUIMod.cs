@@ -13,8 +13,8 @@ namespace ScaleUI {
                 return "Adds slider in options to scale the complete UI.";
             }
         }
-        private const float MIN_SCALE = 0.3f;
-        private const float MAX_SCALE = 1.5f;
+        private const float MIN_SCALE = 0.4f;
+        private const float MAX_SCALE = 1.4f;
         private const float INCR_SCALE = 0.05f;
 
         public void OnSettingsUI(UIHelperBase helper) {
