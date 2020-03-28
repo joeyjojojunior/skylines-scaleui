@@ -26,10 +26,20 @@ namespace ScaleUI
 
             group = helper.AddGroup(Name);
             selectedValue = ModConfig.Instance.scale;
-            group.AddSlider("Minimum Distance", MIN_SCALE, MAX_SCALE, INCR_SCALE, selectedValue, sel =>
+            group.AddSlider("Scale", MIN_SCALE, MAX_SCALE, INCR_SCALE, selectedValue, sel =>
             {
                 ModConfig.Instance.scale = sel;
                 ModConfig.Instance.Save();
+            });
+
+            group.AddButton("Apply", () =>
+            {
+                ModConfig.Instance.isApplyBtn = true;
+            });
+
+            group.AddButton("Reset", () =>
+            {
+                ModConfig.Instance.isResetBtn = true;
             });
         }
     }

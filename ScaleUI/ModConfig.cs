@@ -10,6 +10,9 @@ namespace ScaleUI
     {
         public bool ConfigUpdated { get; set; }
         public float scale { get; set; } = 0;
+        public bool isApplyBtn { get; set; } = true;
+        public bool isResetBtn { get; set; } = true;
+
         private static ModConfig instance;
 
         public static ModConfig Instance
