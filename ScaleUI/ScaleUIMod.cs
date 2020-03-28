@@ -1,10 +1,7 @@
-using System;
 using ICities;
 
-namespace ScaleUI
-{
-    public class ScaleUIMod : IUserMod
-    {
+namespace ScaleUI {
+    public class ScaleUIMod : IUserMod {
         public string Name {
             get {
                 return "ScaleUI2";
@@ -26,19 +23,16 @@ namespace ScaleUI
 
             group = helper.AddGroup(Name);
             selectedValue = ModConfig.Instance.scale;
-            group.AddSlider("Scale", MIN_SCALE, MAX_SCALE, INCR_SCALE, selectedValue, sel =>
-            {
+            group.AddSlider("Scale", MIN_SCALE, MAX_SCALE, INCR_SCALE, selectedValue, sel => {
                 ModConfig.Instance.scale = sel;
                 ModConfig.Instance.Save();
             });
 
-            group.AddButton("Apply", () =>
-            {
+            group.AddButton("Apply", () => {
                 ModConfig.Instance.isApplyBtn = true;
             });
 
-            group.AddButton("Reset", () =>
-            {
+            group.AddButton("Reset", () => {
                 ModConfig.Instance.isResetBtn = true;
             });
         }

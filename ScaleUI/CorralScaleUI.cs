@@ -22,29 +22,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  
 */
-using System;
 using UnityEngine;
-using ColossalFramework.UI;
-using ColossalFramework.Plugins;
 
-namespace ScaleUI
-{
-    public class CorralScaleUI : MonoBehaviour, IScaleUI
-    {
-        
-        public void FixUI ()
-        {
+namespace ScaleUI {
+    public class CorralScaleUI : MonoBehaviour, IScaleUI {
+
+        public void FixUI() {
         }
-        
+
         GameObject corral;
-        
-        public CorralScaleUI (GameObject corralGameObject, Action<String> increaseScale, Action<String> decreaseScale)
-        {
+
+        public CorralScaleUI(GameObject corralGameObject) {
             this.corral = corralGameObject;
         }
-        
-        public void Destroy ()
-        {
+
+        public void Destroy() {
         }
     }
 }
