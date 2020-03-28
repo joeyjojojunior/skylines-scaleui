@@ -56,8 +56,6 @@ namespace ScaleUI
                 UIView v = UIView.GetAView ();
 
                 scaleUIgui = (ScaleUIPanel)v.AddUIComponent (typeof(ScaleUIPanel));
-                ((ScaleUIPanel)scaleUIgui).SetIncreaseScaleCallBack (increaseScaleCallback);
-                ((ScaleUIPanel)scaleUIgui).SetDecreaseScaleCallBack (decreaseScaleCallback);
             } else {
                 scaleUIgui = new CorralScaleUI (corral, increaseScaleCallback, decreaseScaleCallback);
             }

@@ -6,19 +6,6 @@ namespace ScaleUI
 {
     public class ScaleUIPanel : UIPanel, IScaleUI
     {
-        UIButton increaseScaleButton;
-        UIButton decreaseScaleButton;
-
-        public void SetIncreaseScaleCallBack (Action<String> callback)
-        {
-            this.increaseScaleButton.eventClick += (UIComponent component, UIMouseEventParameter eventParam) => callback.Invoke ("");
-        }
-
-        public void SetDecreaseScaleCallBack (Action<String> callback)
-        {
-            this.decreaseScaleButton.eventClick += (UIComponent component, UIMouseEventParameter eventParam) => callback.Invoke ("");
-        }
-
         public void Destroy ()
         {
             this.enabled = false;
@@ -26,12 +13,6 @@ namespace ScaleUI
         public ScaleUIPanel ()
         {
             InitPanel ();
-
-            increaseScaleButton = createButton ();
-            increaseScaleButton.text = "+";                     
-
-            decreaseScaleButton = createButton ();
-            decreaseScaleButton.text = "-";
         }
 
         private void InitPanel ()
@@ -44,35 +25,6 @@ namespace ScaleUI
             this.autoLayoutStart = LayoutStart.TopLeft;
             this.autoLayoutPadding = new RectOffset (0, 0, 0, 0);
             this.autoLayout = true;
-        }
-        
-        private UIButton createButton ()
-        {
-            UIButton button = this.AddUIComponent (typeof(UIButton)) as UIButton;
-            
-            button.horizontalAlignment = UIHorizontalAlignment.Center;
-            button.verticalAlignment = UIVerticalAlignment.Middle;
-            button.textHorizontalAlignment = UIHorizontalAlignment.Center;
-            button.textVerticalAlignment = UIVerticalAlignment.Middle;
-            
-            button.autoSize = false;
-            button.textScale = 1.5f;
-            button.width = 46;
-            button.height = 46;
-            
-            button.normalBgSprite = "OptionBase";
-            button.disabledBgSprite = "OptionBaseDisabled";
-            button.hoveredBgSprite = "OptionBaseHovered";
-            button.focusedBgSprite = "OptionBaseFocused";
-            button.pressedBgSprite = "OptionBasePressed";
-            
-            button.textColor = new Color32 (255, 255, 255, 255);
-            button.disabledTextColor = new Color32 (7, 7, 7, 255);
-            button.hoveredTextColor = new Color32 (7, 132, 255, 255);
-            button.focusedTextColor = new Color32 (255, 255, 255, 255);
-            button.pressedTextColor = new Color32 (30, 30, 44, 255);
-            
-            return button;
         }
 
         public void FixUI ()
