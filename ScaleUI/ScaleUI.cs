@@ -7,6 +7,7 @@ namespace ScaleUI
 {
     public class ScaleUI : MonoBehaviour
     {
+        bool isInitialized;
         float thumbnailbarY = 0f;
         float scalingfactor = 0.05f;
         IScaleUI scaleUIgui;
@@ -19,7 +20,8 @@ namespace ScaleUI
 
         void Update()
         {
-            if (ModConfig.Instance.isApplyBtn) {
+            if (!isInitialized || ModConfig.Instance.isApplyBtn) {
+                isInitialized = true;
                 changeScale(ModConfig.Instance.scale);
                 ModConfig.Instance.ConfigUpdated = false;
                 ModConfig.Instance.isApplyBtn = false;
