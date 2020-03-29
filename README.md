@@ -1,5 +1,5 @@
 # skylines-scaleui
-ScaleUI mod for Cities: Skylines (http://steamcommunity.com/sharedfiles/filedetails/?id=409338401)
+ScaleUI mod for Cities: Skylines ([Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=2040218778))
 
 This mod adds a slider to the options menu to scale / resize the complete user interface in Cities: Skylines.
 
@@ -10,7 +10,7 @@ To reset the scale to default values, hit the Reset button.
 
 The applied scale will be saved and re-applied every time you start/load a game. 
 
-## Known issues
+## Known Issues
 * If you use other mods which add UI elements, this mod will probably reposition them off-screen. To work around this, position them in the center of the screen before scaling, and then reposition them once you are done.
 
 * The close buttons in a few tools might move to a different position.
@@ -26,7 +26,7 @@ I set up MonoDevelop to automatically delete and copy the resulting .dll using P
 
 ## Attributions 
 
-Inspired by [TextScaleMod](http://steamcommunity.com/sharedfiles/filedetails/?id=407225523).
+Inspired by TextScaleMod (no longer on the workshop).
 
 Thanks to nlight for help with Reflection.
 
