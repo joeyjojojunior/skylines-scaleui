@@ -1,29 +1,35 @@
 # skylines-scaleui
 ScaleUI mod for Cities: Skylines (http://steamcommunity.com/sharedfiles/filedetails/?id=409338401)
 
-This mod adds buttons to scale / resize the complete user interface in Cities: Skylines.
+This mod adds a slider to the options menu to scale / resize the complete user interface in Cities: Skylines.
 
 ## Usage
-Activate the mod, load or start a new game (editors not yet supported/tested), then click the new buttons in the top right corner to change the scale.
+Go to ScaleUI in the Options menu, and adjust the slider. Then hit Apply. 
 
-To reset the scale to default values, hit Ctrl+0.
+To reset the scale to default values, hit the Reset button.
+
+The applied scale will be saved and re-applied every time you start/load a game. 
 
 ## Known issues
-This method only works to a certain scale, after which elements will overlap or be out of screen. In that case, either reset the scale or hit the (-) button to decrease it a step. If a reset doesn't work, quicksave your game with F1 and exit with Alt+F4.
+* If you use other mods which add UI elements, this mod will probably reposition them off-screen. To work around this, position them in the center of the screen before scaling, and then reposition them once you are done.
 
-The scaling value is not saved permanently, only when you load a savegame while in a city.
-
-If you use other mods which add UI elements, this mod will probably reposition them off-screen.
-
-The close buttons in a few tools might move to a different position.
+* The close buttons in a few tools might move to a different position.
 
 Please report any issues you find.
+
+## Known Incompatibilities
+
+* **Extended Public Transport UI:** Adding a new transportation route will mess up the spacing of the Lines Overview window. Resetting and re-applying scaling after adding a new line will fix this (until you add another line). 
 
 ## Notice on building the project
 I set up MonoDevelop to automatically delete and copy the resulting .dll using Pre-/After-Build commands. It uses deldll.cmd to achieve, which will **delete** a file, so be careful. Additionally, the project references the assemblies on my local hard drive.
 
 ## Attributions 
 
-Inspired by TextScaleMod (http://steamcommunity.com/sharedfiles/filedetails/?id=407225523)
+Inspired by [TextScaleMod](http://steamcommunity.com/sharedfiles/filedetails/?id=407225523).
 
 Thanks to nlight for help with Reflection.
+
+Thanks to [@githubpermutation](https://github.com/githubpermutation) for doing most of the hard work and creating the [first version of the mod](http://steamcommunity.com/sharedfiles/filedetails/?id=409338401).
+
+Thanks to [@keallu](https://github.com/keallu) whose code I used to figure out how to implement the slider and configuration file.

@@ -2,17 +2,9 @@ using ICities;
 
 namespace ScaleUI {
     public class ScaleUIMod : IUserMod {
-        public string Name {
-            get {
-                return "ScaleUI2";
-            }
-        }
+        public string Name => "ScaleUI ";
+        public string Description => "Adds slider in options to scale the UI.";
 
-        public string Description {
-            get {
-                return "Adds slider in options to scale the complete UI.";
-            }
-        }
         private const float MIN_SCALE = 0.4f;
         private const float MAX_SCALE = 1.4f;
         private const float INCR_SCALE = 0.05f;
@@ -23,6 +15,7 @@ namespace ScaleUI {
 
             group = helper.AddGroup(Name);
             selectedValue = ModConfig.Instance.scale;
+            
             group.AddSlider("Scale", MIN_SCALE, MAX_SCALE, INCR_SCALE, selectedValue, sel => {
                 ModConfig.Instance.scale = sel;
                 ModConfig.Instance.Save();

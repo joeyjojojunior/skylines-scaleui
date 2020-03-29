@@ -43,7 +43,7 @@ public abstract class Configuration<C> where C : class, new() {
         }
     }
 
-    private static string GetConfigPath() {
+    public static string GetConfigPath() {
         if (typeof(C).GetCustomAttributes(typeof(ConfigurationPathAttribute), true)
             .FirstOrDefault() is ConfigurationPathAttribute configPathAttribute) {
             return configPathAttribute.Value;

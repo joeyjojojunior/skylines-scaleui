@@ -71,12 +71,4 @@
     <None Include="ScaleUI.csproj" />
     <None Include="deldll.cmd" />
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="icons\DecreaseScaleHoveredBG.png" />
-    <EmbeddedResource Include="icons\DecreaseScaleNormalBG.png" />
-    <EmbeddedResource Include="icons\DecreaseScalePressedBG.png" />
-    <EmbeddedResource Include="icons\IncreaseScaleHoveredBG.png" />
-    <EmbeddedResource Include="icons\IncreaseScaleNormalBG.png" />
-    <EmbeddedResource Include="icons\IncreaseScalePressedBG.png" />
-  </ItemGroup>
 </Project>

@@ -1,10 +1,12 @@
-﻿namespace ScaleUI {
+﻿using System.IO;
+
+namespace ScaleUI {
     [ConfigurationPath("ScaleUIConfig.xml")]
     public class ModConfig {
         public bool ConfigUpdated { get; set; }
-        public float scale { get; set; } = 0;
-        public bool isApplyBtn { get; set; } = true;
-        public bool isResetBtn { get; set; } = true;
+        public float scale { get; set; } = 1.0f;
+        public bool isApplyBtn { get; set; } = false;
+        public bool isResetBtn { get; set; } = false;
 
         private static ModConfig instance;
 
@@ -12,8 +14,10 @@
             get {
                 if (instance == null) {
                     instance = Configuration<ModConfig>.Load();
+                    
+                    if (!File.Exists(Configuration<ModConfig>.GetConfigPath())) 
+                        instance.Save();
                 }
-
                 return instance;
             }
         }
