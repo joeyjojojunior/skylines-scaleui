@@ -1,42 +1,29 @@
+using ICities;
 using System;
 using UnityEngine;
-using ICities;
-using ColossalFramework.UI;
 
-namespace ScaleUI
-{
-    public class ScaleUILoader : LoadingExtensionBase
-    {
+namespace ScaleUI {
+    public class ScaleUILoader : LoadingExtensionBase {
         GameObject go;
-        ScaleUI scaleUIinstance;
 
-        public override void OnLevelLoaded (LoadMode mode)
-        {
-            base.OnLevelLoaded (mode);          
+        public override void OnLevelLoaded(LoadMode mode) {
+            base.OnLevelLoaded(mode);
             if (mode != LoadMode.LoadGame && mode != LoadMode.NewGame) {
                 return;
             }
 
             go = GameObject.Find("ScaleUI");
-            if(go == null) {
-                go = new GameObject ("ScaleUI");
-                scaleUIinstance = go.AddComponent<ScaleUI> ();
-            }
-
-            try {
-                UIInput.eventProcessKeyEvent += new UIInput.ProcessKeyEventHandler (scaleUIinstance.keyhandle);
-            } catch (Exception ex) {
-                ex.ToString();
+            if (go == null) {
+                go = new GameObject("ScaleUI");
+                go.AddComponent<ScaleUI>();
             }
         }
 
-        public override void OnLevelUnloading ()
-        {
+        public override void OnLevelUnloading() {
             try {
-                UIInput.eventProcessKeyEvent -= new UIInput.ProcessKeyEventHandler (scaleUIinstance.keyhandle);
-                GameObject.Destroy (go);
+                GameObject.Destroy(go);
             } catch (Exception ex) {
-                ex.ToString();
+                DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, "ScaleUI: " + ex.ToString());
             }
         }
     }

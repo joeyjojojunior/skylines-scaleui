@@ -1,227 +1,153 @@
-using System;
-using UnityEngine;
 using ColossalFramework.UI;
+using System;
 using System.Collections.Generic;
+using UnityEngine;
 
-namespace ScaleUI
-{
-    public class ScaleUI : MonoBehaviour
-    {
+namespace ScaleUI {
+    public class ScaleUI : MonoBehaviour {
         bool isInitialized;
         float thumbnailbarY = 0f;
-        float scalingfactor = 0.05f;
-        IScaleUI scaleUIgui;
-        GameObject corral;
 
-        void OnDestroy ()
-        {
-            scaleUIgui.Destroy ();
-        }
-
-        void Update()
-        {
+        void Update() {
             if (!isInitialized || ModConfig.Instance.isApplyBtn) {
                 isInitialized = true;
-                changeScale(ModConfig.Instance.scale);
+                ChangeScale(ModConfig.Instance.scale);
                 ModConfig.Instance.ConfigUpdated = false;
                 ModConfig.Instance.isApplyBtn = false;
             }
 
-            if (ModConfig.Instance.isResetBtn)
-            {
+            if (ModConfig.Instance.isResetBtn) {
                 SetDefaultScale();
                 ModConfig.Instance.isResetBtn = false;
             }
         }
 
-        void Start ()
-        {
-            try {
-                InitUI ();
-            } catch (Exception ex) {
-                DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, "ScaleUI: "+ex.ToString());
-            }
+        void Start() {
             try {
                 FixEverything();
             } catch (Exception ex) {
-                DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, "ScaleUI: "+ex.ToString());
-            }
-        }
-
-        void InitUI ()
-        {
-            corral = GameObject.Find ("CorralRegistrationGameObject");
-            if (corral == null) {
-                //use default ui
-                UIView v = UIView.GetAView ();
-
-                scaleUIgui = (ScaleUIPanel)v.AddUIComponent (typeof(ScaleUIPanel));
-                ((ScaleUIPanel)scaleUIgui).SetIncreaseScaleCallBack (increaseScaleCallback);
-                ((ScaleUIPanel)scaleUIgui).SetDecreaseScaleCallBack (decreaseScaleCallback);
-            } else {
-                scaleUIgui = new CorralScaleUI (corral, increaseScaleCallback, decreaseScaleCallback);
-            }
-        }
-
-        public void keyhandle (EventType eventType, KeyCode keyCode, EventModifiers modifiers)
-        {
-            if (eventType == EventType.KeyDown && modifiers == EventModifiers.Control && (keyCode == KeyCode.Alpha0 || keyCode == KeyCode.Keypad0)) {
-                SetDefaultScale ();
-            }
-        }
-
-        private void increaseScaleCallback (String name)
-        {
-            increaseScale (null, null);
-        }
-
-        private void increaseScale (UIComponent component, UIMouseEventParameter eventParam)
-        {
-            UIView.GetAView ().scale += scalingfactor;
-            FixEverything ();
-        }
-
-        private void decreaseScaleCallback (String name)
-        {
-            decreaseScale (null, null);
-        }
-
-        private void decreaseScale (UIComponent component, UIMouseEventParameter eventParam)
-        {
-            UIView.GetAView ().scale = Math.Max (UIView.GetAView ().scale - scalingfactor, 0.1f);
-            FixEverything ();
-        }
-        
-        private void SetDefaultScale ()
-        {
-            UIView.GetAView ().scale = 1f;
-            FixEverything ();
-        }
-
-        private void FixEverything ()
-        {
-            FixCamera ();
-            FixUIPositions ();
-        }
-
-        private void FixCamera ()
-        {
-            if (UIView.GetAView ().scale < 1.0f) {
-                if (cameraIsFullscreen ()) {
-                    return;
-                }
-                MakeCameraFullscreen.Initialize ();
-            } else {
-                //scaleui redirected camera
-                if (MakeCameraFullscreen.cameraControllerRedirected) {
-                    MakeCameraFullscreen.Deinitialize ();
-                }
+                DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, "ScaleUI: " + ex.ToString());
             }
         }
         
-        public void changeScale(float scale)
-        {
+        public void ChangeScale(float scale) {
             UIView.GetAView().scale = scale;
             FixEverything();
         }
 
-        private bool cameraIsFullscreen ()
-        {
+        private void SetDefaultScale() {
+            UIView.GetAView().scale = 1f;
+            FixEverything();
+        }
+
+        private void FixEverything() {
+            FixCamera();
+            FixUIPositions();
+        }
+
+        private void FixCamera() {
+            if (UIView.GetAView().scale < 1.0f) {
+                if (CameraIsFullscreen()) {
+                    return;
+                }
+                MakeCameraFullscreen.Initialize();
+            } else {
+                //scaleui redirected camera
+                if (MakeCameraFullscreen.cameraControllerRedirected) {
+                    MakeCameraFullscreen.Deinitialize();
+                }
+            }
+        }
+
+        private bool CameraIsFullscreen() {
             if (MakeCameraFullscreen.cameraControllerRedirected) {
                 return true;
             }
-            CameraController cameraController = GameObject.FindObjectOfType<CameraController> ();
+            CameraController cameraController = GameObject.FindObjectOfType<CameraController>();
             if (cameraController != null) {
-            
-                Camera camera = cameraController.GetComponent<Camera> ();
+
+                Camera camera = cameraController.GetComponent<Camera>();
                 if (camera != null) {
-            
-                    if (Mathf.Approximately (camera.rect.width, 1) && Mathf.Approximately (camera.rect.height, 1)) {
+
+                    if (Mathf.Approximately(camera.rect.width, 1) && Mathf.Approximately(camera.rect.height, 1)) {
                         //already fullscreen
                         return true;
                     }
                 }
             }
-            
+
             return false;
         }
 
-        private void FixUIPositions ()
-        {           
+        private void FixUIPositions() {
             try {
-                fixFullScreenContainer ();
-                fixInfoMenu ();
-                fixInfoViewsContainer ();
-                fixPoliciesPanel ();
-                fixUnlockingPanel ();
-
-                scaleUIgui.FixUI ();
+                FixFullScreenContainer();
+                FixInfoMenu();
+                FixInfoViewsContainer();
+                FixPoliciesPanel();
+                FixUnlockingPanel();
             } catch (Exception ex) {
+                DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, "ScaleUI: " + ex.ToString());
             }
         }
-        
-        private void fixFullScreenContainer ()
-        {
+
+        private void FixFullScreenContainer() {
             //rescale the border around the window (when paused)
             UIComponent uic;
-            uic = UIView.GetAView ().FindUIComponent ("ThumbnailBar");
+            uic = UIView.GetAView().FindUIComponent("ThumbnailBar");
             if (thumbnailbarY == 0f) {
                 thumbnailbarY = uic.relativePosition.y;
             }
             float diffHeight = uic.relativePosition.y - thumbnailbarY;
             thumbnailbarY = uic.relativePosition.y;
 
-            uic = UIView.GetAView ().FindUIComponent ("FullScreenContainer");
+            uic = UIView.GetAView().FindUIComponent("FullScreenContainer");
             uic.height += diffHeight;
-            uic.relativePosition = new Vector2 (0, 0);
+            uic.relativePosition = new Vector2(0, 0);
         }
-        
-        private void fixInfoMenu ()
-        {
+
+        private void FixInfoMenu() {
             //button top left
-            UIComponent fullscreenContainer = UIView.GetAView ().FindUIComponent ("FullScreenContainer");
-            UIComponent infomenu = UIView.GetAView ().FindUIComponent ("InfoMenu");
+            UIComponent fullscreenContainer = UIView.GetAView().FindUIComponent("FullScreenContainer");
+            UIComponent infomenu = UIView.GetAView().FindUIComponent("InfoMenu");
 
             infomenu.transformPosition = new Vector2(fullscreenContainer.GetBounds().min.x, fullscreenContainer.GetBounds().max.y);
-            infomenu.relativePosition += new Vector3 (70.0f, 5.0f);
+            infomenu.relativePosition += new Vector3(70.0f, 5.0f);
         }
-        
-        private void fixInfoViewsContainer ()
-        {
+
+        private void FixInfoViewsContainer() {
             //container with info buttons
-            UIComponent infomenu = UIView.GetAView ().FindUIComponent ("InfoMenu");
-            UIComponent infomenucontainer = UIView.GetAView ().FindUIComponent ("InfoViewsContainer");
+            UIComponent infomenu = UIView.GetAView().FindUIComponent("InfoMenu");
+            UIComponent infomenucontainer = UIView.GetAView().FindUIComponent("InfoViewsContainer");
 
             infomenucontainer.pivot = UIPivotPoint.TopCenter;
-            infomenucontainer.transformPosition = new Vector3 (infomenu.GetBounds ().center.x, infomenu.GetBounds ().min.y);
-            infomenucontainer.relativePosition += new Vector3 (-6.0f, 7.0f);
+            infomenucontainer.transformPosition = new Vector3(infomenu.GetBounds().center.x, infomenu.GetBounds().min.y);
+            infomenucontainer.relativePosition += new Vector3(-6.0f, 7.0f);
         }
-        
-        private void fixPoliciesPanel ()
-        {
+
+        private void FixPoliciesPanel() {
             //much too big and can't be repositioned easily, need to reduce the size
             PoliciesPanel policies = ToolsModifierControl.policiesPanel;
-            
-            List<int> li = new List<int> ();
-            li.Add (DistrictPolicies.CITYPLANNING_POLICY_COUNT);
-            li.Add (DistrictPolicies.SERVICE_POLICY_COUNT);
-            li.Add (DistrictPolicies.SPECIAL_POLICY_COUNT);
-            li.Add (DistrictPolicies.TAXATION_POLICY_COUNT);
-            li.Sort ();
-            li.Reverse ();
-            int maxPolicies = li [0];
-            
-            UIButton b = (UIButton)policies.Find ("PolicyButton");
+
+            List<int> li = new List<int>();
+            li.Add(DistrictPolicies.CITYPLANNING_POLICY_COUNT);
+            li.Add(DistrictPolicies.SERVICE_POLICY_COUNT);
+            li.Add(DistrictPolicies.SPECIAL_POLICY_COUNT);
+            li.Add(DistrictPolicies.TAXATION_POLICY_COUNT);
+            li.Sort();
+            li.Reverse();
+            int maxPolicies = li[0];
+
+            UIButton b = (UIButton)policies.Find("PolicyButton");
             float buttonheight = b.height;
             policies.component.height = maxPolicies * buttonheight + 200f;
         }
-        
-        private void fixUnlockingPanel ()
-        {
+
+        private void FixUnlockingPanel() {
             //UnlockingPanel
             //position at top of screen so it's visible with scaled ui
-            UnityEngine.Object obj = GameObject.FindObjectOfType (typeof(UnlockingPanel));
-            ReflectionUtils.WritePrivate<UnlockingPanel> (obj, "m_StartPosition", new UnityEngine.Vector3 (-1f, 1f));
+            UnityEngine.Object obj = GameObject.FindObjectOfType(typeof(UnlockingPanel));
+            ReflectionUtils.WritePrivate<UnlockingPanel>(obj, "m_StartPosition", new UnityEngine.Vector3(-1f, 1f));
         }
     }
 }

@@ -1,35 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.IO;
 
-namespace ScaleUI
-{
+namespace ScaleUI {
     [ConfigurationPath("ScaleUIConfig.xml")]
-    public class ModConfig
-    {
+    public class ModConfig {
         public bool ConfigUpdated { get; set; }
-        public float scale { get; set; } = 0;
-        public bool isApplyBtn { get; set; } = true;
-        public bool isResetBtn { get; set; } = true;
+        public float scale { get; set; } = 1.0f;
+        public bool isApplyBtn { get; set; } = false;
+        public bool isResetBtn { get; set; } = false;
 
         private static ModConfig instance;
 
-        public static ModConfig Instance
-        {
-            get
-            {
-                if (instance == null)
-                {
+        public static ModConfig Instance {
+            get {
+                if (instance == null) {
                     instance = Configuration<ModConfig>.Load();
+                    
+                    if (!File.Exists(Configuration<ModConfig>.GetConfigPath())) 
+                        instance.Save();
                 }
-
                 return instance;
             }
         }
 
-        public void Save()
-        {
+        public void Save() {
             Configuration<ModConfig>.Save();
             ConfigUpdated = true;
         }

@@ -22,61 +22,54 @@ using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-namespace ScaleUI
-{
-    
-    public struct RedirectCallsState
-    {
+namespace ScaleUI {
+
+    public struct RedirectCallsState {
         public byte a, b, c, d, e;
         public ulong f;
     }
-    
+
     /// <summary>
     /// Helper class to deal with detours. This version is for Unity 5 x64 on Windows.
     /// We provide three different methods of detouring.
     /// </summary>
-    public static class RedirectionHelper
-    {
+    public static class RedirectionHelper {
         // Note: These two DllImports are really only used in the alternative methods
         // for detouring.
         [DllImport("mono.dll", CallingConvention = CallingConvention.FastCall, EntryPoint = "mono_domain_get")]
         private static extern IntPtr mono_domain_get();
-        
+
         [DllImport("mono.dll", CallingConvention = CallingConvention.FastCall, EntryPoint = "mono_method_get_header")]
         private static extern IntPtr mono_method_get_header(IntPtr method);
-        
+
         /// <summary>
         /// Redirects all calls from method 'from' to method 'to'.
         /// </summary>
         /// <param name="from"></param>
         /// <param name="to"></param>
-        public static RedirectCallsState RedirectCalls(MethodInfo from, MethodInfo to)
-        {
+        public static RedirectCallsState RedirectCalls(MethodInfo from, MethodInfo to) {
             // GetFunctionPointer enforces compilation of the method.
             var fptr1 = from.MethodHandle.GetFunctionPointer();
             var fptr2 = to.MethodHandle.GetFunctionPointer();
             return PatchJumpTo(fptr1, fptr2);
         }
-        
-        public static void RevertRedirect(MethodInfo from, RedirectCallsState state)
-        {
+
+        public static void RevertRedirect(MethodInfo from, RedirectCallsState state) {
             var fptr1 = from.MethodHandle.GetFunctionPointer();
             RevertJumpTo(fptr1, state);
         }
-        
+
         /// <summary>
         /// Primitive patching. Inserts a jump to 'target' at 'site'. Works even if both methods'
         /// callers have already been compiled.
         /// </summary>
         /// <param name="site"></param>
         /// <param name="target"></param>
-        private static RedirectCallsState PatchJumpTo(IntPtr site, IntPtr target)
-        {
+        private static RedirectCallsState PatchJumpTo(IntPtr site, IntPtr target) {
             RedirectCallsState state = new RedirectCallsState();
-            
+
             // R11 is volatile.
-            unsafe
-            {
+            unsafe {
                 byte* sitePtr = (byte*)site.ToPointer();
                 state.a = *sitePtr;
                 state.b = *(sitePtr + 1);
@@ -84,7 +77,7 @@ namespace ScaleUI
                 state.d = *(sitePtr + 11);
                 state.e = *(sitePtr + 12);
                 state.f = *((ulong*)(sitePtr + 2));
-                
+
                 *sitePtr = 0x49; // mov r11, target
                 *(sitePtr + 1) = 0xBB;
                 *((ulong*)(sitePtr + 2)) = (ulong)target.ToInt64();
@@ -92,14 +85,12 @@ namespace ScaleUI
                 *(sitePtr + 11) = 0xFF;
                 *(sitePtr + 12) = 0xE3;
             }
-            
+
             return state;
         }
-        
-        private static void RevertJumpTo(IntPtr site, RedirectCallsState state)
-        {
-            unsafe
-            {
+
+        private static void RevertJumpTo(IntPtr site, RedirectCallsState state) {
+            unsafe {
                 byte* sitePtr = (byte*)site.ToPointer();
                 *sitePtr = state.a; // mov r11, target
                 *(sitePtr + 1) = state.b;
@@ -109,6 +100,6 @@ namespace ScaleUI
                 *(sitePtr + 12) = state.e;
             }
         }
-        
+
     }
 }
