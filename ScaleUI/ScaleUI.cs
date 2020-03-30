@@ -2,6 +2,7 @@ using ColossalFramework.UI;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using ColossalFramework.Plugins;
 
 namespace ScaleUI {
     public class ScaleUI : MonoBehaviour {
@@ -86,6 +87,7 @@ namespace ScaleUI {
                 FixInfoViewsContainer();
                 FixPoliciesPanel();
                 FixUnlockingPanel();
+                FixDisasterDetection();
             } catch (Exception ex) {
                 DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, "ScaleUI: " + ex.ToString());
             }
@@ -109,12 +111,11 @@ namespace ScaleUI {
         private void FixInfoMenu() {
             //button top left
             UIComponent fullscreenContainer = UIView.GetAView().FindUIComponent("FullScreenContainer");
+
             UIComponent infomenu = UIView.GetAView().FindUIComponent("InfoMenu");
-
             infomenu.transformPosition = new Vector2(fullscreenContainer.GetBounds().min.x, fullscreenContainer.GetBounds().max.y);
-            infomenu.relativePosition += new Vector3(70.0f, 5.0f);
+            infomenu.relativePosition += new Vector3(70.0f, 6.0f);
         }
-
         private void FixInfoViewsContainer() {
             //container with info buttons
             UIComponent infomenu = UIView.GetAView().FindUIComponent("InfoMenu");
@@ -122,7 +123,18 @@ namespace ScaleUI {
 
             infomenucontainer.pivot = UIPivotPoint.TopCenter;
             infomenucontainer.transformPosition = new Vector3(infomenu.GetBounds().center.x, infomenu.GetBounds().min.y);
-            infomenucontainer.relativePosition += new Vector3(-6.0f, 7.0f);
+            infomenucontainer.relativePosition += new Vector3(-6.0f, 6.0f);
+        }
+
+        private void FixDisasterDetection() {
+            UIComponent fullscreenContainer = UIView.GetAView().FindUIComponent("FullScreenContainer");
+
+            const float OFFSET_X = 40.0f;
+            const float OFFSET_Y = 3.0f;
+            UIComponent resp2 = UIView.GetAView().FindUIComponent("WarningPhasePanel");
+            resp2.transformPosition = new Vector2(fullscreenContainer.GetBounds().min.x, fullscreenContainer.GetBounds().max.y);
+            resp2.relativePosition += new Vector3(OFFSET_X, OFFSET_Y); // won't stick without doing it twice
+            resp2.relativePosition += new Vector3(OFFSET_X, OFFSET_Y);
         }
 
         private void FixPoliciesPanel() {
