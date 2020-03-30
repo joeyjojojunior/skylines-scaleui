@@ -88,6 +88,7 @@ namespace ScaleUI {
                 FixPoliciesPanel();
                 FixUnlockingPanel();
                 FixDisasterDetection();
+                FixCategoriesCloseButton();
             } catch (Exception ex) {
                 DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, "ScaleUI: " + ex.ToString());
             }
@@ -131,10 +132,10 @@ namespace ScaleUI {
 
             const float OFFSET_X = 40.0f;
             const float OFFSET_Y = 3.0f;
-            UIComponent resp2 = UIView.GetAView().FindUIComponent("WarningPhasePanel");
-            resp2.transformPosition = new Vector2(fullscreenContainer.GetBounds().min.x, fullscreenContainer.GetBounds().max.y);
-            resp2.relativePosition += new Vector3(OFFSET_X, OFFSET_Y); // won't stick without doing it twice
-            resp2.relativePosition += new Vector3(OFFSET_X, OFFSET_Y);
+            UIComponent disasterWarnPanel = UIView.GetAView().FindUIComponent("WarningPhasePanel");
+            disasterWarnPanel.transformPosition = new Vector2(fullscreenContainer.GetBounds().min.x, fullscreenContainer.GetBounds().max.y);
+            disasterWarnPanel.relativePosition += new Vector3(OFFSET_X, OFFSET_Y); // won't stick without doing it twice
+            disasterWarnPanel.relativePosition += new Vector3(OFFSET_X, OFFSET_Y);
         }
 
         private void FixPoliciesPanel() {
@@ -160,6 +161,35 @@ namespace ScaleUI {
             //position at top of screen so it's visible with scaled ui
             UnityEngine.Object obj = GameObject.FindObjectOfType(typeof(UnlockingPanel));
             ReflectionUtils.WritePrivate<UnlockingPanel>(obj, "m_StartPosition", new UnityEngine.Vector3(-1f, 1f));
+        }
+
+        private void FixCategoriesCloseButton() {
+            UIComponent tsBar = GameObject.Find("TSBar").GetComponent<UIComponent>();
+            UIComponent tsCloseButton = GameObject.Find("TSCloseButton").GetComponent<UIComponent>();
+            tsBar.RemoveUIComponent(tsCloseButton);
+        }
+        
+        private void LogAllComponents() {
+            var components = UnityEngine.Object.FindObjectsOfType<UIComponent>();
+            foreach (var c in components) {
+                Debug.Log("Comp: " + c.ToString());
+            }
+        }
+
+        private void LogComponentChildren(UIComponent component) {
+            foreach (var child in component.GetComponentsInChildren<UIComponent>()) {
+                Debug.Log("Child of " + component.ToString() + ": " + child.ToString());
+            }
+        }
+
+        private void LogComponentParents(UIComponent component) {
+            foreach (var parent in component.GetComponentsInParent<UIComponent>()) {
+                Debug.Log("Parent of " + component.ToString() + ": " + parent.ToString());
+            }
+        }
+
+        private void DebugMsg(String s) {
+            DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, s);
         }
     }
 }
