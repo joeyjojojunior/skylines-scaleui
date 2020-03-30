@@ -132,10 +132,15 @@ namespace ScaleUI {
 
             const float OFFSET_X = 40.0f;
             const float OFFSET_Y = 3.0f;
-            UIComponent disasterWarnPanel = UIView.GetAView().FindUIComponent("WarningPhasePanel");
-            disasterWarnPanel.transformPosition = new Vector2(fullscreenContainer.GetBounds().min.x, fullscreenContainer.GetBounds().max.y);
-            disasterWarnPanel.relativePosition += new Vector3(OFFSET_X, OFFSET_Y); // won't stick without doing it twice
-            disasterWarnPanel.relativePosition += new Vector3(OFFSET_X, OFFSET_Y);
+           
+            try {
+                UIComponent disasterWarnPanel = UIView.GetAView().FindUIComponent("WarningPhasePanel");
+                disasterWarnPanel.transformPosition = new Vector2(fullscreenContainer.GetBounds().min.x, fullscreenContainer.GetBounds().max.y);
+                disasterWarnPanel.relativePosition += new Vector3(OFFSET_X, OFFSET_Y); // won't stick without doing it twice
+                disasterWarnPanel.relativePosition += new Vector3(OFFSET_X, OFFSET_Y);
+            } catch (Exception ex) {
+                ex.ToString();
+            }
         }
 
         private void FixPoliciesPanel() {
