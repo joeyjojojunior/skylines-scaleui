@@ -9,9 +9,10 @@ namespace ScaleUI {
     public class ScaleUI : MonoBehaviour {
         bool isInitialized;
         float thumbnailbarY = 0f;
-        uint num_transport_lines;
-        UIComponent tsBar = GameObject.Find("TSBar").GetComponent<UIComponent>();
+        UIComponent tsBar; 
         UIComponent tsCloseButton; 
+        Array16<TransportLine> lines;
+        uint num_transport_lines;
 
         void Update() {
             if (!isInitialized || ModConfig.Instance.isApplyBtn) {
@@ -25,16 +26,30 @@ namespace ScaleUI {
                 SetDefaultScale();
                 ModConfig.Instance.isResetBtn = false;
             }
+
+            //FixCloseButton();
             
             try {
-                tsCloseButton = GameObject.Find("TSCloseButton").GetComponent<UIComponent>();
 
+                /*
+                UIComponent[] tsBarChildren = tsBar.GetComponentsInChildren<UIComponent>();
+
+                foreach (var c in tsBarChildren) {
+                    if (c.ToString() == "TSCloseButton" && c.isVisible) 
+                            tsBar.RemoveUIComponent(c);
+                    
+                }
+                */
+
+                /*
                 if (tsCloseButton.isVisible) {
                     tsBar.RemoveUIComponent(tsCloseButton);
                 }
+                */
             } catch (Exception ex) {}
-
-            Array16<TransportLine> lines = Singleton<TransportManager>.instance.m_lines;
+            
+            //ddd
+            lines = Singleton<TransportManager>.instance.m_lines;
             uint curr_num_lines = lines.ItemCount();
             if (curr_num_lines > num_transport_lines) {
                 ChangeScale(ModConfig.Instance.scale + 0.0001f);
@@ -45,6 +60,10 @@ namespace ScaleUI {
 
         void Start() {
             try {
+                tsBar = GameObject.Find("TSBar").GetComponent<UIComponent>();
+                tsCloseButton = GameObject.Find("TSCloseButton").GetComponent<UIComponent>();
+                tsBar.eventClicked += new MouseEventHandler(FixCloseButton);
+
                 num_transport_lines = Singleton<TransportManager>.instance.m_lines.ItemCount();
                 FixEverything();
             } catch (Exception ex) {
@@ -192,18 +211,17 @@ namespace ScaleUI {
                 // Top Level Panel
                 UIComponent LinesOverview = GameObject.Find("(Library) PublicTransportDetailPanel").GetComponent<UIComponent>();
                 GameObject MonorailDetail = GameObject.Find("MonorailDetail");
-
-
-
-
-                //LogComponentChildren(LinesOverview);
             } catch (Exception ex) {
                 DebugMsg("Can't find: " + ex.ToString());
             }
         }
 
-        private void FixCategoriesCloseButton() {
-            tsBar.RemoveUIComponent(tsCloseButton);
+        private void FixCloseButton(UIComponent component, UIMouseEventParameter eventParam) {
+            DebugMsg("Click!");
+            Vector3 pos = new Vector3(-1f, -1f); 
+            if (tsCloseButton.position != pos) {
+                tsCloseButton.position = pos;
+            }
         }
         
         private void LogAllComponents() {
@@ -224,10 +242,10 @@ namespace ScaleUI {
                 Debug.Log("Parent of " + component.ToString() + ": " + parent.ToString());
             }
         }
-
         private void DebugMsg(String s) {
             DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, s);
         }
+
     }
 }
 
