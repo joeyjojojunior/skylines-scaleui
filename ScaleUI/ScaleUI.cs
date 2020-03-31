@@ -37,8 +37,8 @@ namespace ScaleUI {
             Array16<TransportLine> lines = Singleton<TransportManager>.instance.m_lines;
             uint curr_num_lines = lines.ItemCount();
             if (curr_num_lines > num_transport_lines) {
-                ChangeScale(ModConfig.Instance.scale + 0.01f);
-                ChangeScale(ModConfig.Instance.scale - 0.01f);
+                ChangeScale(ModConfig.Instance.scale + 0.0001f);
+                ChangeScale(ModConfig.Instance.scale - 0.0001f);
             } 
             num_transport_lines = curr_num_lines;
         }
