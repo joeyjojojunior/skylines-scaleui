@@ -1,13 +1,15 @@
 using ColossalFramework.UI;
+using ColossalFramework.Plugins;
+using ColossalFramework;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using ColossalFramework.Plugins;
 
 namespace ScaleUI {
     public class ScaleUI : MonoBehaviour {
         bool isInitialized;
         float thumbnailbarY = 0f;
+        uint num_transport_lines;
         UIComponent tsBar = GameObject.Find("TSBar").GetComponent<UIComponent>();
         UIComponent tsCloseButton; 
 
@@ -31,10 +33,19 @@ namespace ScaleUI {
                     tsBar.RemoveUIComponent(tsCloseButton);
                 }
             } catch (Exception ex) {}
+
+            Array16<TransportLine> lines = Singleton<TransportManager>.instance.m_lines;
+            uint curr_num_lines = lines.ItemCount();
+            if (curr_num_lines > num_transport_lines) {
+                ChangeScale(ModConfig.Instance.scale + 0.01f);
+                ChangeScale(ModConfig.Instance.scale - 0.01f);
+            } 
+            num_transport_lines = curr_num_lines;
         }
 
         void Start() {
             try {
+                num_transport_lines = Singleton<TransportManager>.instance.m_lines.ItemCount();
                 FixEverything();
             } catch (Exception ex) {
                 DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, "ScaleUI: " + ex.ToString());
@@ -98,6 +109,7 @@ namespace ScaleUI {
                 FixPoliciesPanel();
                 FixUnlockingPanel();
                 FixDisasterDetection();
+                FixLinesOverview();
             } catch (Exception ex) {
                 DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, "ScaleUI: " + ex.ToString());
             }
@@ -173,6 +185,21 @@ namespace ScaleUI {
             //position at top of screen so it's visible with scaled ui
             UnityEngine.Object obj = GameObject.FindObjectOfType(typeof(UnlockingPanel));
             ReflectionUtils.WritePrivate<UnlockingPanel>(obj, "m_StartPosition", new UnityEngine.Vector3(-1f, 1f));
+        }
+        
+        private void FixLinesOverview() {
+            try {
+                // Top Level Panel
+                UIComponent LinesOverview = GameObject.Find("(Library) PublicTransportDetailPanel").GetComponent<UIComponent>();
+                GameObject MonorailDetail = GameObject.Find("MonorailDetail");
+
+
+
+
+                //LogComponentChildren(LinesOverview);
+            } catch (Exception ex) {
+                DebugMsg("Can't find: " + ex.ToString());
+            }
         }
 
         private void FixCategoriesCloseButton() {
