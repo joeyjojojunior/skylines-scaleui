@@ -8,6 +8,8 @@ namespace ScaleUI {
     public class ScaleUI : MonoBehaviour {
         bool isInitialized;
         float thumbnailbarY = 0f;
+        UIComponent tsBar = GameObject.Find("TSBar").GetComponent<UIComponent>();
+        UIComponent tsCloseButton; 
 
         void Update() {
             if (!isInitialized || ModConfig.Instance.isApplyBtn) {
@@ -21,6 +23,14 @@ namespace ScaleUI {
                 SetDefaultScale();
                 ModConfig.Instance.isResetBtn = false;
             }
+            
+            try {
+                tsCloseButton = GameObject.Find("TSCloseButton").GetComponent<UIComponent>();
+
+                if (tsCloseButton.isVisible) {
+                    tsBar.RemoveUIComponent(tsCloseButton);
+                }
+            } catch (Exception ex) {}
         }
 
         void Start() {
@@ -88,7 +98,6 @@ namespace ScaleUI {
                 FixPoliciesPanel();
                 FixUnlockingPanel();
                 FixDisasterDetection();
-                FixCategoriesCloseButton();
             } catch (Exception ex) {
                 DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, "ScaleUI: " + ex.ToString());
             }
@@ -138,9 +147,7 @@ namespace ScaleUI {
                 disasterWarnPanel.transformPosition = new Vector2(fullscreenContainer.GetBounds().min.x, fullscreenContainer.GetBounds().max.y);
                 disasterWarnPanel.relativePosition += new Vector3(OFFSET_X, OFFSET_Y); // won't stick without doing it twice
                 disasterWarnPanel.relativePosition += new Vector3(OFFSET_X, OFFSET_Y);
-            } catch (Exception ex) {
-                ex.ToString();
-            }
+            } catch (Exception ex) {}
         }
 
         private void FixPoliciesPanel() {
@@ -169,8 +176,6 @@ namespace ScaleUI {
         }
 
         private void FixCategoriesCloseButton() {
-            UIComponent tsBar = GameObject.Find("TSBar").GetComponent<UIComponent>();
-            UIComponent tsCloseButton = GameObject.Find("TSCloseButton").GetComponent<UIComponent>();
             tsBar.RemoveUIComponent(tsCloseButton);
         }
         
