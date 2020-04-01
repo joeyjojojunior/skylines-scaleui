@@ -7,14 +7,19 @@ using UnityEngine;
 
 namespace ScaleUI {
     public class ScaleUI : MonoBehaviour {
-        bool isInitialized;
-        float thumbnailbarY = 0f;
-        UIComponent tsBar; 
-        UIComponent tsCloseButton; 
-        Array16<TransportLine> lines;
-        uint num_transport_lines;
+        private bool isInitialized;
+        private uint num_transport_lines;
+        private float thumbnailbarY = 0f;
+        private Vector2 CLOSEBTN_HIDE_POS = new Vector3(-1000f, -1000f);
 
-        void Update() {
+        private UIView uiView;
+        private UIComponent fullscreenContainer;
+        private UIComponent infomenu;
+        private UIComponent infomenuContainer;
+        private UIComponent disasterWarnPanel;
+        private UIComponent tsCloseButton; 
+
+        public void Update() {
             if (!isInitialized || ModConfig.Instance.isApplyBtn) {
                 isInitialized = true;
                 ChangeScale(ModConfig.Instance.scale);
@@ -26,68 +31,63 @@ namespace ScaleUI {
                 SetDefaultScale();
                 ModConfig.Instance.isResetBtn = false;
             }
-
-            //FixCloseButton();
-            
-            try {
-
-                /*
-                UIComponent[] tsBarChildren = tsBar.GetComponentsInChildren<UIComponent>();
-
-                foreach (var c in tsBarChildren) {
-                    if (c.ToString() == "TSCloseButton" && c.isVisible) 
-                            tsBar.RemoveUIComponent(c);
-                    
-                }
-                */
-
-                /*
-                if (tsCloseButton.isVisible) {
-                    tsBar.RemoveUIComponent(tsCloseButton);
-                }
-                */
-            } catch (Exception ex) {}
-            
-            //ddd
-            lines = Singleton<TransportManager>.instance.m_lines;
-            uint curr_num_lines = lines.ItemCount();
-            if (curr_num_lines > num_transport_lines) {
-                ChangeScale(ModConfig.Instance.scale + 0.0001f);
-                ChangeScale(ModConfig.Instance.scale - 0.0001f);
-            } 
-            num_transport_lines = curr_num_lines;
+            FixLinesOverview();
         }
 
-        void Start() {
+        public void Start() {
             try {
-                tsBar = GameObject.Find("TSBar").GetComponent<UIComponent>();
-                tsCloseButton = GameObject.Find("TSCloseButton").GetComponent<UIComponent>();
-                tsBar.eventClicked += new MouseEventHandler(FixCloseButton);
-
                 num_transport_lines = Singleton<TransportManager>.instance.m_lines.ItemCount();
+                uiView = UIView.GetAView();
+                fullscreenContainer = GameObject.Find("FullScreenContainer").GetComponent<UIComponent>();
+                infomenu = GameObject.Find("InfoMenu").GetComponent<UIComponent>();
+                infomenuContainer = GameObject.Find("InfoViewsContainer").GetComponent<UIComponent>();
+                disasterWarnPanel = GameObject.Find("WarningPhasePanel").GetComponent<UIComponent>();
+                tsCloseButton = GameObject.Find("TSCloseButton").GetComponent<UIComponent>();
+
+                UIComponent tsContainer = GameObject.Find("TSContainer").GetComponent<UIComponent>();
+                tsContainer.eventClicked += new MouseEventHandler(HideCloseButton); 
+
                 FixEverything();
             } catch (Exception ex) {
                 DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, "ScaleUI: " + ex.ToString());
             }
         }
-        
+
+        private void FixLinesOverview() {
+            uint curr_num_lines = Singleton<TransportManager>.instance.m_lines.ItemCount();
+            if (curr_num_lines > num_transport_lines) {
+                ChangeScale(ModConfig.Instance.scale + 0.0001f);
+                ChangeScale(ModConfig.Instance.scale - 0.0001f);
+            }
+            num_transport_lines = curr_num_lines;
+        }
+
         public void ChangeScale(float scale) {
-            UIView.GetAView().scale = scale;
+            uiView.scale = scale;
             FixEverything();
         }
 
         private void SetDefaultScale() {
-            UIView.GetAView().scale = 1f;
+            uiView.scale = 1f;
             FixEverything();
         }
 
         private void FixEverything() {
-            FixCamera();
-            FixUIPositions();
+            try {
+                FixCamera();
+                FixFullScreenContainer();
+                FixInfoMenu();
+                FixInfoViewsContainer();
+                FixDisasterDetection();
+                FixPoliciesPanel();
+                FixUnlockingPanel();
+            } catch (Exception ex) {
+                DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, "ScaleUI: " + ex.ToString());
+            }
         }
 
         private void FixCamera() {
-            if (UIView.GetAView().scale < 1.0f) {
+            if (uiView.scale < 1.0f) {
                 if (CameraIsFullscreen()) {
                     return;
                 }
@@ -116,65 +116,40 @@ namespace ScaleUI {
                     }
                 }
             }
-
             return false;
-        }
-
-        private void FixUIPositions() {
-            try {
-                FixFullScreenContainer();
-                FixInfoMenu();
-                FixInfoViewsContainer();
-                FixPoliciesPanel();
-                FixUnlockingPanel();
-                FixDisasterDetection();
-                FixLinesOverview();
-            } catch (Exception ex) {
-                DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, "ScaleUI: " + ex.ToString());
-            }
         }
 
         private void FixFullScreenContainer() {
             //rescale the border around the window (when paused)
             UIComponent uic;
-            uic = UIView.GetAView().FindUIComponent("ThumbnailBar");
+            uic = uiView.FindUIComponent("ThumbnailBar");
             if (thumbnailbarY == 0f) {
                 thumbnailbarY = uic.relativePosition.y;
             }
             float diffHeight = uic.relativePosition.y - thumbnailbarY;
             thumbnailbarY = uic.relativePosition.y;
 
-            uic = UIView.GetAView().FindUIComponent("FullScreenContainer");
-            uic.height += diffHeight;
-            uic.relativePosition = new Vector2(0, 0);
+            fullscreenContainer.height += diffHeight;
+            fullscreenContainer.relativePosition = new Vector2(0, 0);
         }
 
         private void FixInfoMenu() {
             //button top left
-            UIComponent fullscreenContainer = UIView.GetAView().FindUIComponent("FullScreenContainer");
-
-            UIComponent infomenu = UIView.GetAView().FindUIComponent("InfoMenu");
             infomenu.transformPosition = new Vector2(fullscreenContainer.GetBounds().min.x, fullscreenContainer.GetBounds().max.y);
             infomenu.relativePosition += new Vector3(70.0f, 6.0f);
         }
         private void FixInfoViewsContainer() {
             //container with info buttons
-            UIComponent infomenu = UIView.GetAView().FindUIComponent("InfoMenu");
-            UIComponent infomenucontainer = UIView.GetAView().FindUIComponent("InfoViewsContainer");
-
-            infomenucontainer.pivot = UIPivotPoint.TopCenter;
-            infomenucontainer.transformPosition = new Vector3(infomenu.GetBounds().center.x, infomenu.GetBounds().min.y);
-            infomenucontainer.relativePosition += new Vector3(-6.0f, 6.0f);
+            infomenuContainer.pivot = UIPivotPoint.TopCenter;
+            infomenuContainer.transformPosition = new Vector3(infomenu.GetBounds().center.x, infomenu.GetBounds().min.y);
+            infomenuContainer.relativePosition += new Vector3(-6.0f, 6.0f);
         }
 
         private void FixDisasterDetection() {
-            UIComponent fullscreenContainer = UIView.GetAView().FindUIComponent("FullScreenContainer");
-
             const float OFFSET_X = 40.0f;
             const float OFFSET_Y = 3.0f;
            
             try {
-                UIComponent disasterWarnPanel = UIView.GetAView().FindUIComponent("WarningPhasePanel");
                 disasterWarnPanel.transformPosition = new Vector2(fullscreenContainer.GetBounds().min.x, fullscreenContainer.GetBounds().max.y);
                 disasterWarnPanel.relativePosition += new Vector3(OFFSET_X, OFFSET_Y); // won't stick without doing it twice
                 disasterWarnPanel.relativePosition += new Vector3(OFFSET_X, OFFSET_Y);
@@ -206,22 +181,9 @@ namespace ScaleUI {
             ReflectionUtils.WritePrivate<UnlockingPanel>(obj, "m_StartPosition", new UnityEngine.Vector3(-1f, 1f));
         }
         
-        private void FixLinesOverview() {
-            try {
-                // Top Level Panel
-                UIComponent LinesOverview = GameObject.Find("(Library) PublicTransportDetailPanel").GetComponent<UIComponent>();
-                GameObject MonorailDetail = GameObject.Find("MonorailDetail");
-            } catch (Exception ex) {
-                DebugMsg("Can't find: " + ex.ToString());
-            }
-        }
-
-        private void FixCloseButton(UIComponent component, UIMouseEventParameter eventParam) {
-            DebugMsg("Click!");
-            Vector3 pos = new Vector3(-1f, -1f); 
-            if (tsCloseButton.position != pos) {
-                tsCloseButton.position = pos;
-            }
+        // MouseEventHandler to hide button when a category panel is clicked
+        private void HideCloseButton(UIComponent component, UIMouseEventParameter eventParam) {
+            tsCloseButton.position = CLOSEBTN_HIDE_POS;
         }
         
         private void LogAllComponents() {
