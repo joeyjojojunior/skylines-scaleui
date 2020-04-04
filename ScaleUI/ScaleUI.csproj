@@ -71,4 +71,8 @@
     <None Include="ScaleUI.csproj" />
     <None Include="deldll.cmd" />
   </ItemGroup>
+  <PropertyGroup>
+    <PostBuildEvent>copy $(SolutionDir)ScaleUI\bin\Release\ScaleUI.dll "C:\Users\Igor\AppData\Local\Colossal Order\Cities_Skylines\Addons\Mods\ScaleUI"
+</PostBuildEvent>
+  </PropertyGroup>
 </Project>

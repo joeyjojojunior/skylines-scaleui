@@ -157,21 +157,7 @@ namespace ScaleUI {
         }
 
         private void FixPoliciesPanel() {
-            //much too big and can't be repositioned easily, need to reduce the size
-            PoliciesPanel policies = ToolsModifierControl.policiesPanel;
-
-            List<int> li = new List<int>();
-            li.Add(DistrictPolicies.CITYPLANNING_POLICY_COUNT);
-            li.Add(DistrictPolicies.SERVICE_POLICY_COUNT);
-            li.Add(DistrictPolicies.SPECIAL_POLICY_COUNT);
-            li.Add(DistrictPolicies.TAXATION_POLICY_COUNT);
-            li.Sort();
-            li.Reverse();
-            int maxPolicies = li[0];
-
-            UIButton b = (UIButton)policies.Find("PolicyButton");
-            float buttonheight = b.height;
-            policies.component.height = maxPolicies * buttonheight + 200f;
+            ToolsModifierControl.policiesPanel.component.height = fullscreenContainer.height;
         }
 
         private void FixUnlockingPanel() {
