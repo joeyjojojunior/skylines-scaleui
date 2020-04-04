@@ -1,4 +1,5 @@
 using ICities;
+using ColossalFramework.UI;
 
 namespace ScaleUI {
     public class ScaleUIMod : IUserMod {
@@ -16,7 +17,7 @@ namespace ScaleUI {
             group = helper.AddGroup(Name);
             selectedValue = ModConfig.Instance.scale;
             
-            group.AddSlider("Scale", MIN_SCALE, MAX_SCALE, INCR_SCALE, selectedValue, sel => {
+            UISlider scaleSlider = (UISlider) group.AddSlider("Scale", MIN_SCALE, MAX_SCALE, INCR_SCALE, selectedValue, sel => {
                 ModConfig.Instance.scale = sel;
                 ModConfig.Instance.Save();
             });
@@ -26,7 +27,9 @@ namespace ScaleUI {
             });
 
             group.AddButton("Reset", () => {
+                ModConfig.Instance.scale = 1.0f;
                 ModConfig.Instance.isResetBtn = true;
+                scaleSlider.value = ModConfig.Instance.scale;
             });
         }
     }
