@@ -1,5 +1,7 @@
 using ICities;
 using ColossalFramework.UI;
+using ColossalFramework.Plugins;
+
 
 namespace ScaleUI {
     public class ScaleUIMod : IUserMod {
@@ -19,6 +21,10 @@ namespace ScaleUI {
             
             UITextField scaleText = (UITextField)group.AddTextfield("Scale", selectedValue.ToString(), (t) => { });
             scaleText.readOnly = true;
+            scaleText.horizontalAlignment = UIHorizontalAlignment.Center;
+            scaleText.canFocus = false;
+            scaleText.normalBgSprite = "";
+            scaleText.hoveredBgSprite = "";
 
             UISlider scaleSlider = (UISlider) group.AddSlider(" ", MIN_SCALE, MAX_SCALE, INCR_SCALE, selectedValue, sel => {
                 ModConfig.Instance.scale = sel;

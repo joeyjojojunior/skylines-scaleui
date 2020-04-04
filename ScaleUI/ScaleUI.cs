@@ -2,7 +2,6 @@ using ColossalFramework.UI;
 using ColossalFramework.Plugins;
 using ColossalFramework;
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace ScaleUI {
@@ -157,7 +156,7 @@ namespace ScaleUI {
         }
 
         private void FixPoliciesPanel() {
-            ToolsModifierControl.policiesPanel.component.height = fullscreenContainer.height;
+            ToolsModifierControl.policiesPanel.component.height = fullscreenContainer.height - 65.0f;
         }
 
         private void FixUnlockingPanel() {
