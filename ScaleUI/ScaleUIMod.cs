@@ -17,9 +17,13 @@ namespace ScaleUI {
             group = helper.AddGroup(Name);
             selectedValue = ModConfig.Instance.scale;
             
-            UISlider scaleSlider = (UISlider) group.AddSlider("Scale", MIN_SCALE, MAX_SCALE, INCR_SCALE, selectedValue, sel => {
+            UITextField scaleText = (UITextField)group.AddTextfield("Scale", selectedValue.ToString(), (t) => { });
+            scaleText.readOnly = true;
+
+            UISlider scaleSlider = (UISlider) group.AddSlider(" ", MIN_SCALE, MAX_SCALE, INCR_SCALE, selectedValue, sel => {
                 ModConfig.Instance.scale = sel;
                 ModConfig.Instance.Save();
+                scaleText.text = sel.ToString();
             });
 
             group.AddButton("Apply", () => {
