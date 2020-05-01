@@ -65,15 +65,15 @@ namespace ScaleUI {
         }
 
         private void UpdateFreeCamera() {
-            
             if (!initialized) {
                 camera = cameraController.GetComponent<Camera>();
                 cachedFreeCamera = (bool)cachedFreeCameraField.GetValue(cameraController);
+                cachedFreeCameraField.SetValue(cameraController, true);
                 initialized = true;
             } 
 
             if (cameraController.m_freeCamera != cachedFreeCamera) {
-                cachedFreeCameraField.SetValue(cameraController, cameraController.m_freeCamera);
+                cachedFreeCamera = cameraController.m_freeCamera;
                 UIView.Show(!cameraController.m_freeCamera);
                 Singleton<NotificationManager>.instance.NotificationsVisible = !cameraController.m_freeCamera;
                 Singleton<GameAreaManager>.instance.BordersVisible = !cameraController.m_freeCamera;
