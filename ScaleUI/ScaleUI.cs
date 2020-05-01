@@ -88,9 +88,6 @@ namespace ScaleUI {
 
         private void FixCamera() {
             if (uiView.scale < 1.0f) {
-                if (CameraIsFullscreen()) {
-                    return;
-                }
                 MakeCameraFullscreen.Initialize();
             } else {
                 //scaleui redirected camera
@@ -98,25 +95,6 @@ namespace ScaleUI {
                     MakeCameraFullscreen.Deinitialize();
                 }
             }
-        }
-
-        private bool CameraIsFullscreen() {
-            if (MakeCameraFullscreen.cameraControllerRedirected) {
-                return true;
-            }
-            CameraController cameraController = GameObject.FindObjectOfType<CameraController>();
-            if (cameraController != null) {
-
-                Camera camera = cameraController.GetComponent<Camera>();
-                if (camera != null) {
-
-                    if (Mathf.Approximately(camera.rect.width, 1) && Mathf.Approximately(camera.rect.height, 1)) {
-                        //already fullscreen
-                        return true;
-                    }
-                }
-            }
-            return false;
         }
 
         private void FixFullScreenContainer() {
