@@ -2,6 +2,7 @@ using ColossalFramework.UI;
 using ColossalFramework.Plugins;
 using ColossalFramework;
 using System;
+using System.Reflection;
 using UnityEngine;
 
 namespace ScaleUI {
@@ -55,8 +56,8 @@ namespace ScaleUI {
         private void FixLinesOverview() {
             uint curr_num_lines = Singleton<TransportManager>.instance.m_lines.ItemCount();
             if (curr_num_lines > num_transport_lines) {
-                ChangeScale(ModConfig.Instance.scale + 0.0001f);
-                ChangeScale(ModConfig.Instance.scale - 0.0001f);
+                ChangeScale(ModConfig.Instance.scale + 0.01f);
+                ChangeScale(ModConfig.Instance.scale - 0.01f);
             }
             num_transport_lines = curr_num_lines;
         }

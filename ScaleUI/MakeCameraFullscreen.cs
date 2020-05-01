@@ -31,13 +31,18 @@ namespace ScaleUI {
     public class MakeCameraFullscreen {
 
         private static RedirectCallsState cameraControllerRedirect;
+        private static bool initialized = false;
         public static bool cameraControllerRedirected = false;
+        private static bool cachedFreeCamera = false;
+        private static CameraController cameraController;
+        private static Camera camera;
+        private static FieldInfo cachedFreeCameraField = typeof(CameraController).GetField("m_cachedFreeCamera", BindingFlags.Instance | BindingFlags.NonPublic);
 
         public static void Initialize() {
             if (cameraControllerRedirected) {
                 return;
             }
-            CameraController cameraController = GameObject.FindObjectOfType<CameraController>();
+            cameraController = GameObject.FindObjectOfType<CameraController>();
             if (cameraController != null) {
                 MethodInfo m1 = typeof(CameraController).GetMethod("UpdateFreeCamera", BindingFlags.Instance | BindingFlags.NonPublic);
                 MethodInfo m2 = typeof(MakeCameraFullscreen).GetMethod("UpdateFreeCamera", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -53,25 +58,21 @@ namespace ScaleUI {
                 RedirectionHelper.RevertRedirect(typeof(CameraController).GetMethod("UpdateFreeCamera",
                                                                                     BindingFlags.Instance | BindingFlags.NonPublic), cameraControllerRedirect);
             }
-
             cameraControllerRedirected = false;
+            initialized = false;
+            camera = null;
+            cachedFreeCamera = false;
         }
 
         private void UpdateFreeCamera() {
-            CameraController cameraController = GameObject.FindObjectOfType<CameraController>();
+            
+            if (!initialized) {
+                camera = cameraController.GetComponent<Camera>();
+                cachedFreeCamera = (bool)cachedFreeCameraField.GetValue(cameraController);
+                initialized = true;
+            } 
 
-            if (cameraController == null) {
-                return;
-            }
-
-            var cachedFreeCameraField = typeof(CameraController).GetField("m_cachedFreeCamera", BindingFlags.Instance | BindingFlags.NonPublic);
-            if (cachedFreeCameraField == null) {
-                return;
-            }
-
-            var camera = cameraController.GetComponent<Camera>();
-
-            if (cameraController.m_freeCamera != (bool)cachedFreeCameraField.GetValue(cameraController)) {
+            if (cameraController.m_freeCamera != cachedFreeCamera) {
                 cachedFreeCameraField.SetValue(cameraController, cameraController.m_freeCamera);
                 UIView.Show(!cameraController.m_freeCamera);
                 Singleton<NotificationManager>.instance.NotificationsVisible = !cameraController.m_freeCamera;
@@ -80,8 +81,8 @@ namespace ScaleUI {
                 Singleton<PropManager>.instance.MarkersVisible = !cameraController.m_freeCamera;
                 Singleton<GuideManager>.instance.TutorialDisabled = cameraController.m_freeCamera;
             }
+            camera.rect = new Rect(0, 0, 1.0f, 1.0f);
 
-            camera.rect = new Rect(0, 0, 1, 1);
         }
 
     }
