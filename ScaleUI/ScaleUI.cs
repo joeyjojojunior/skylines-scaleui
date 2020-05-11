@@ -2,7 +2,7 @@ using ColossalFramework.UI;
 using ColossalFramework.Plugins;
 using ColossalFramework;
 using System;
-using System.Reflection;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace ScaleUI {
@@ -17,7 +17,12 @@ namespace ScaleUI {
         private UIComponent infomenu;
         private UIComponent infomenuContainer;
         private UIComponent disasterWarnPanel;
-        private UIComponent tsCloseButton; 
+        private UIComponent tsCloseButton;
+
+        private List<UIComponent> lineTemplates;
+        private UIComponent ltExample;
+        private UIComponent[] ltExampleChildren;
+        Dictionary<String, Vector3> ltChildPositions;
 
         public void Update() {
             if (!isInitialized || ModConfig.Instance.isApplyBtn) {
@@ -45,7 +50,35 @@ namespace ScaleUI {
                 tsCloseButton = GameObject.Find("TSCloseButton").GetComponent<UIComponent>();
 
                 UIComponent tsContainer = GameObject.Find("TSContainer").GetComponent<UIComponent>();
-                tsContainer.eventClicked += new MouseEventHandler(HideCloseButton); 
+                tsContainer.eventClicked += new MouseEventHandler(HideCloseButton);
+
+                ltExample = GameObject.Find("LineTemplate(Clone)").GetComponent<UIComponent>();
+                ltExampleChildren = ltExample.GetComponentsInChildren<UIComponent>();
+
+                ltChildPositions = new Dictionary<string, Vector3>();
+
+                foreach (var c in ltExampleChildren) {
+                    String s = c.name;
+                    if (!ltChildPositions.ContainsKey(s)) {
+                        ltChildPositions.Add(s, new Vector3(c.position.x, c.position.y, c.position.z));
+                    }
+                }
+                /*
+                foreach (var c in ltChildPositions) {
+                    Debug.Log(c.Key + ", " + c.Value.ToString());
+                }
+                */
+                
+
+                // Get all current transport line panels
+                //UIPanel[] uiPanels = GameObject.FindObjectsOfType<UIPanel>();
+                //lineTemplates = new List<UIComponent>();
+                //or (int i = 0; i < uiPanels.Length; i++) {
+                //    if (uiPanels[i].GetComponent<UIPanel>().name == "LineTemplate(Clone)") {
+                //        lineTemplates.Add(uiPanels[i].GetComponent<UIPanel>());
+                //    }
+                //}
+                
 
                 FixEverything();
             } catch (Exception ex) {
@@ -56,8 +89,20 @@ namespace ScaleUI {
         private void FixLinesOverview() {
             uint curr_num_lines = Singleton<TransportManager>.instance.m_lines.ItemCount();
             if (curr_num_lines > num_transport_lines) {
-                ChangeScale(ModConfig.Instance.scale + 0.01f);
-                ChangeScale(ModConfig.Instance.scale - 0.01f);
+                UIPanel[] uiPanels = GameObject.FindObjectsOfType<UIPanel>();
+                for (int i = 0; i < uiPanels.Length; i++) {
+                    var p = uiPanels[i].GetComponent<UIPanel>();
+                    if (p.name == "LineTemplate(Clone)") {
+                        // Update position of new line's UIPanel children to match our known good template
+                        UIComponent[] children = p.GetComponentsInChildren<UIComponent>();
+                        foreach (var c in children) {
+                            Vector3 pos;
+                            if (ltChildPositions.TryGetValue(c.name, out pos)) {
+                                c.position = pos;
+                            }
+                        }
+                    }
+                }
             }
             num_transport_lines = curr_num_lines;
         }
@@ -75,7 +120,7 @@ namespace ScaleUI {
         private void FixEverything() {
             try {
                 FixCamera();
-                FixFullScreenContainer();
+                FixPauseBorder();
                 FixInfoMenu();
                 FixInfoViewsContainer();
                 FixDisasterDetection();
@@ -90,15 +135,13 @@ namespace ScaleUI {
             if (uiView.scale < 1.0f) {
                 MakeCameraFullscreen.Initialize();
             } else {
-                //scaleui redirected camera
                 if (MakeCameraFullscreen.cameraControllerRedirected) {
                     MakeCameraFullscreen.Deinitialize();
                 }
             }
         }
 
-        private void FixFullScreenContainer() {
-            //rescale the border around the window (when paused)
+        private void FixPauseBorder() {
             UIComponent uic;
             uic = uiView.FindUIComponent("ThumbnailBar");
             if (thumbnailbarY == 0f) {
@@ -112,12 +155,11 @@ namespace ScaleUI {
         }
 
         private void FixInfoMenu() {
-            //button top left
             infomenu.transformPosition = new Vector2(fullscreenContainer.GetBounds().min.x, fullscreenContainer.GetBounds().max.y);
             infomenu.relativePosition += new Vector3(70.0f, 6.0f);
         }
+
         private void FixInfoViewsContainer() {
-            //container with info buttons
             infomenuContainer.pivot = UIPivotPoint.TopCenter;
             infomenuContainer.transformPosition = new Vector3(infomenu.GetBounds().center.x, infomenu.GetBounds().min.y);
             infomenuContainer.relativePosition += new Vector3(-6.0f, 6.0f);
@@ -139,39 +181,37 @@ namespace ScaleUI {
         }
 
         private void FixUnlockingPanel() {
-            //UnlockingPanel
-            //position at top of screen so it's visible with scaled ui
             UnityEngine.Object obj = GameObject.FindObjectOfType(typeof(UnlockingPanel));
             ReflectionUtils.WritePrivate<UnlockingPanel>(obj, "m_StartPosition", new UnityEngine.Vector3(-1f, 1f));
         }
         
-        // MouseEventHandler to hide button when a category panel is clicked
         private void HideCloseButton(UIComponent component, UIMouseEventParameter eventParam) {
             tsCloseButton.position = CLOSEBTN_HIDE_POS;
         }
+
+        private void ltMouse(UIComponent component, UIMouseEventParameter eventParam) {
+            /*
+            DebugMsg("Mouse Before: " + component.transform.localScale.ToString());
+            component.transform.localScale = new Vector3(0.90f, 1f, 1f);
+            DebugMsg("Mouse After: " + component.transform.localScale.ToString());
+            */
+
+            //DebugMsg("ltMouse comp: " + component.ToString());
+            //DebugMsg("ltMouse eventParam: " + eventParam.ToString());
+            //DebugMsg("ltMouse eventParam source: " + eventParam.source.ToString());
+            //DebugMsg("Comp width: " + component.width);
+            //DebugMsg("Comp height: " + component.height);
+        }
         
-        private void LogAllComponents() {
+       private void LogAllComponents() {
             var components = UnityEngine.Object.FindObjectsOfType<UIComponent>();
             foreach (var c in components) {
                 Debug.Log("Comp: " + c.ToString());
             }
-        }
-
-        private void LogComponentChildren(UIComponent component) {
-            foreach (var child in component.GetComponentsInChildren<UIComponent>()) {
-                Debug.Log("Child of " + component.ToString() + ": " + child.ToString());
-            }
-        }
-
-        private void LogComponentParents(UIComponent component) {
-            foreach (var parent in component.GetComponentsInParent<UIComponent>()) {
-                Debug.Log("Parent of " + component.ToString() + ": " + parent.ToString());
-            }
-        }
+        } 
         private void DebugMsg(String s) {
             DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, s);
         }
-
     }
 }
 

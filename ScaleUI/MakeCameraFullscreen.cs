@@ -29,7 +29,7 @@ using UnityEngine;
 
 namespace ScaleUI {
     public class MakeCameraFullscreen {
-
+        private static Rect fullRect = new Rect(0, 0, 1, 1);
         private static RedirectCallsState cameraControllerRedirect;
         private static bool initialized = false;
         public static bool cameraControllerRedirected = false;
@@ -69,8 +69,10 @@ namespace ScaleUI {
                 camera = cameraController.GetComponent<Camera>();
                 cachedFreeCamera = (bool)cachedFreeCameraField.GetValue(cameraController);
                 initialized = true;
-            } 
+            }
 
+            // We have either entered or exited the free camera, so we 
+            // must remove or restore UI elements accordingly. 
             if (cameraController.m_freeCamera != cachedFreeCamera) {
                 cachedFreeCameraField.SetValue(cameraController, cameraController.m_freeCamera);
                 cachedFreeCamera = cameraController.m_freeCamera;
@@ -81,10 +83,12 @@ namespace ScaleUI {
                 Singleton<PropManager>.instance.MarkersVisible = !cameraController.m_freeCamera;
                 Singleton<GuideManager>.instance.TutorialDisabled = cameraController.m_freeCamera;
             }
-            camera.rect = new Rect(0, 0, 1.0f, 1.0f);
 
+            // Ideally we wouldn't have to do this every tick, but not doing so
+            // will break other camera mods, e.g. FPSCamera. It doesn't seem
+            // to affect performance in any way.
+            camera.rect = fullRect;
         }
-
     }
-
 }
+ 
