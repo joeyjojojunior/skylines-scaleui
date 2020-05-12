@@ -37,25 +37,13 @@ namespace ScaleUI {
 
             uint curr_num_lines = Singleton<TransportManager>.instance.m_lines.ItemCount();
             if (curr_num_lines > 2) {
+                // If we started with no transport lines, we have to refresh the scale
+                // to adjust the sizing of the first line's components, then cache the positions
+                // of its components to re-use for alignment later
                 if (!isLinePositionsCached) {
-                    ChangeScale(ModConfig.Instance.scale + 0.01f);
-                    ChangeScale(ModConfig.Instance.scale - 0.01f);
-                    FixEverything();
-                    try {
-                        // Find an example transport line UIPanel with known good spacing and save the 
-                        // position of all its children in a dict indexed by the component's name
-                        UIComponent[] ltExampleChildren =
-                            GameObject.Find("LineTemplate(Clone)").GetComponent<UIComponent>().GetComponentsInChildren<UIComponent>();
-                        foreach (var c in ltExampleChildren) {
-                            String s = c.name;
-                            DebugMsg(s);
-                            if (!ltChildPositions.ContainsKey(s)) {
-                                ltChildPositions.Add(s, new Vector3(c.position.x, c.position.y, c.position.z));
-                            }
-                        }
-                        isLinePositionsCached = true;
-                        DebugMsg("Cached2!");
-                    } catch (Exception ex) { }
+                    float oldScale = ModConfig.Instance.scale;
+                    ChangeScale(ModConfig.Instance.scale + 0.0001f); // Re-aligns new transport line components
+                    ChangeScale(oldScale);
                 }
             }
             FixLinesOverview();
@@ -64,52 +52,17 @@ namespace ScaleUI {
         public void Start() {
 
             try {
-                // Find an example transport line UIPanel with known good spacing and save the 
-                // position of all its children in a dict indexed by the component's name
-             
-                //num_transport_lines = Singleton<TransportManager>.instance.m_lines.ItemCount();
-                /*
-                try {
-                    // Find an example transport line UIPanel with known good spacing and save the 
-                    // position of all its children in a dict indexed by the component's name
-                    UIComponent[] ltExampleChildren =
-                        GameObject.Find("LineTemplate").GetComponent<UIComponent>().GetComponentsInChildren<UIComponent>();
-                    ltChildPositions = new Dictionary<string, Vector3>();
-                    foreach (var c in ltExampleChildren) {
-                        String s = c.name;
-                        if (!ltChildPositions.ContainsKey(s)) {
-                            ltChildPositions.Add(s, new Vector3(c.position.x, c.position.y, c.position.z));
-                        }
-                    }
-                    isLinePositionsCached = true;
-                } catch (Exception ex) {
-                }
-                */
                 uiView = UIView.GetAView();
                 fullscreenContainer = GameObject.Find("FullScreenContainer").GetComponent<UIComponent>();
                 infomenu = GameObject.Find("InfoMenu").GetComponent<UIComponent>();
                 infomenuContainer = GameObject.Find("InfoViewsContainer").GetComponent<UIComponent>();
                 disasterWarnPanel = GameObject.Find("WarningPhasePanel").GetComponent<UIComponent>();
                 tsCloseButton = GameObject.Find("TSCloseButton").GetComponent<UIComponent>();
+                ltChildPositions = new Dictionary<string, Vector3>();
 
                 UIComponent tsContainer = GameObject.Find("TSContainer").GetComponent<UIComponent>();
                 tsContainer.eventClicked += new MouseEventHandler(HideCloseButton);
-
-                ltChildPositions = new Dictionary<string, Vector3>();
-                try {
-                    num_transport_lines = Singleton<TransportManager>.instance.m_lines.ItemCount();
-                    UIComponent[] ltExampleChildren =
-                        GameObject.Find("LineTemplate(Clone)").GetComponent<UIComponent>().GetComponentsInChildren<UIComponent>();
-                    foreach (var c in ltExampleChildren) {
-                        String s = c.name;
-                        if (!ltChildPositions.ContainsKey(s)) {
-                            ltChildPositions.Add(s, new Vector3(c.position.x, c.position.y, c.position.z));
-                        }
-                    }
-                    isLinePositionsCached = true;
-                    DebugMsg("Cached!");
-                } catch (Exception ex) { }
-
+                
                 FixEverything();
             } catch (Exception ex) {
                 DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, "ScaleUI: " + ex.ToString());
@@ -127,9 +80,7 @@ namespace ScaleUI {
                     if (p.name == "LineTemplate(Clone)") {
                         UIComponent[] children = p.GetComponentsInChildren<UIComponent>();
                         foreach (var c in children) {
-                            Vector3 pos;
-                            if (ltChildPositions.TryGetValue(c.name, out pos)) {
-                                DebugMsg("c.name: " + c.name);
+                            if (ltChildPositions.TryGetValue(c.name, out Vector3 pos)) {
                                 c.position = pos;
                             }
                         }
@@ -141,11 +92,13 @@ namespace ScaleUI {
 
         public void ChangeScale(float scale) {
             uiView.scale = scale;
+            CacheLinePositions();
             FixEverything();
         }
 
         private void SetDefaultScale() {
             uiView.scale = 1f;
+            CacheLinePositions();
             FixEverything();
         }
 
@@ -205,7 +158,9 @@ namespace ScaleUI {
                 disasterWarnPanel.transformPosition = new Vector2(fullscreenContainer.GetBounds().min.x, fullscreenContainer.GetBounds().max.y);
                 disasterWarnPanel.relativePosition += new Vector3(OFFSET_X, OFFSET_Y); // won't stick without doing it twice
                 disasterWarnPanel.relativePosition += new Vector3(OFFSET_X, OFFSET_Y);
-            } catch (Exception ex) {}
+            } catch (Exception ex) {
+                DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, "ScaleUI: " + ex.ToString());
+            }
         }
 
         private void FixPoliciesPanel() {
@@ -220,19 +175,22 @@ namespace ScaleUI {
         private void HideCloseButton(UIComponent component, UIMouseEventParameter eventParam) {
             tsCloseButton.position = CLOSEBTN_HIDE_POS;
         }
-
-        private void ltMouse(UIComponent component, UIMouseEventParameter eventParam) {
-            /*
-            DebugMsg("Mouse Before: " + component.transform.localScale.ToString());
-            component.transform.localScale = new Vector3(0.90f, 1f, 1f);
-            DebugMsg("Mouse After: " + component.transform.localScale.ToString());
-            */
-
-            //DebugMsg("ltMouse comp: " + component.ToString());
-            //DebugMsg("ltMouse eventParam: " + eventParam.ToString());
-            //DebugMsg("ltMouse eventParam source: " + eventParam.source.ToString());
-            //DebugMsg("Comp width: " + component.width);
-            //DebugMsg("Comp height: " + component.height);
+        
+        private void CacheLinePositions() {
+            // Find an example transport line UIPanel with known good spacing and save the 
+            // position of all its children in a dict indexed by the component's name
+            try {
+                num_transport_lines = Singleton<TransportManager>.instance.m_lines.ItemCount();
+                UIComponent[] ltExampleChildren =
+                    GameObject.Find("LineTemplate(Clone)").GetComponent<UIComponent>().GetComponentsInChildren<UIComponent>();
+                foreach (var c in ltExampleChildren) {
+                    String s = c.name;
+                    if (!ltChildPositions.ContainsKey(s)) {
+                        ltChildPositions.Add(s, new Vector3(c.position.x, c.position.y, c.position.z));
+                    }
+                }
+                isLinePositionsCached = true;
+            } catch (Exception ex) { }
         }
         
        private void LogAllComponents() {
