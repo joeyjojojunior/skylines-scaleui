@@ -3,7 +3,6 @@
 namespace ScaleUI {
     [ConfigurationPath("ScaleUIConfig.xml")]
     public class ModConfig {
-        public bool ConfigUpdated { get; set; }
         public float scale { get; set; } = 1.0f;
         public bool isApplyBtn { get; set; } = false;
         public bool isResetBtn { get; set; } = false;
@@ -24,7 +23,6 @@ namespace ScaleUI {
 
         public void Save() {
             Configuration<ModConfig>.Save();
-            ConfigUpdated = true;
         }
     }
 }

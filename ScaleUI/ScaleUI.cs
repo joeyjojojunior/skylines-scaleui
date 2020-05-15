@@ -35,26 +35,14 @@ namespace ScaleUI {
             if (!isInitialized || ModConfig.Instance.isApplyBtn) {
                 isInitialized = true;
                 ChangeScale(ModConfig.Instance.scale);
-                ModConfig.Instance.ConfigUpdated = false;
                 ModConfig.Instance.isApplyBtn = false;
             }
 
             if (ModConfig.Instance.isResetBtn) {
-                SetDefaultScale();
+                ChangeScale(1);
                 ModConfig.Instance.isResetBtn = false;
             }
 
-            uint currNumLines = Singleton<TransportManager>.instance.m_lines.ItemCount();
-            if (currNumLines > 2) {
-                // If we started with no transport lines, we have to refresh the scale
-                // to adjust the sizing of the first line's components, then cache the positions
-                // of its components to re-use for alignment later
-                if (!isLinePositionsCached) {
-                    float oldScale = ModConfig.Instance.scale;
-                    ChangeScale(ModConfig.Instance.scale + 0.0001f); // Re-aligns new transport line components
-                    ChangeScale(oldScale);
-                }
-            }
             FixLinesOverview();
             FixAllComponentPositions();
         }
@@ -70,8 +58,6 @@ namespace ScaleUI {
                 tsCloseButton = GameObject.Find("TSCloseButton").GetComponent<UIComponent>();
                 unlockingPanel = GameObject.FindObjectOfType(typeof(UnlockingPanel));
                 ltChildPositionsCache = new Dictionary<string, Vector3>();
-                
-                
                 allUIComponents = GameObject.FindObjectsOfType<UIComponent>();
                 tsBar = GameObject.Find("TSBar").GetComponent<UIComponent>();
                 allUIComponentsCache = new Dictionary<int, Vector3>();
@@ -81,19 +67,12 @@ namespace ScaleUI {
                 
                 FixEverything();
             } catch (Exception ex) {
-                DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, "ScaleUI: " + ex.ToString());
+                DebugMsg("ScaleUI: " + ex.ToString());
             }
         }
 
         public void ChangeScale(float scale) {
             uiView.scale = scale;
-            CacheLinePositions();
-            CacheAllUIComponents();
-            FixEverything();
-        }
-
-        private void SetDefaultScale() {
-            uiView.scale = 1f;
             CacheLinePositions();
             CacheAllUIComponents();
             FixEverything();
@@ -110,7 +89,7 @@ namespace ScaleUI {
                 FixUnlockingPanel();
                 tsCloseButton.position = new Vector3(-1000.0f, -1000.0f);
             } catch (Exception ex) {
-                DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, "ScaleUI: " + ex.ToString());
+                DebugMsg("ScaleUI: " + ex.ToString());
             }
         }
 
@@ -155,7 +134,7 @@ namespace ScaleUI {
                 disasterWarnPanel.relativePosition += new Vector3(OFFSET_X, OFFSET_Y); // won't stick without doing it twice
                 disasterWarnPanel.relativePosition += new Vector3(OFFSET_X, OFFSET_Y);
             } catch (Exception ex) {
-                DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, "ScaleUI: " + ex.ToString());
+                DebugMsg("ScaleUI: " + ex.ToString());
             }
         }
 
@@ -171,10 +150,19 @@ namespace ScaleUI {
         // children  to the known good positions we saved earlier in our dict
         private void FixLinesOverview() {
             uint currNumLines = Singleton<TransportManager>.instance.m_lines.ItemCount();
+
+            if (!isLinePositionsCached && currNumLines > 2) {
+                // If we started with no transport lines, we have to refresh the scale
+                // to adjust the sizing of the first line's components, then cache the positions
+                // of its components to re-use for alignment later
+                float oldScale = ModConfig.Instance.scale;
+                ChangeScale(ModConfig.Instance.scale + 0.1f); // Re-aligns new transport line components
+                ChangeScale(oldScale);
+            }
+
             if (currNumLines > numTransportLines) {
                 UIPanel[] uiPanels = GameObject.FindObjectsOfType<UIPanel>();
-                for (int i = 0; i < uiPanels.Length; i++) {
-                    var p = uiPanels[i].GetComponent<UIPanel>();
+                foreach (var p in uiPanels) { 
                     if (p.name == "LineTemplate(Clone)") {
                         UIComponent[] children = p.GetComponentsInChildren<UIComponent>();
                         foreach (var c in children) {
@@ -193,25 +181,27 @@ namespace ScaleUI {
         // We check for the break by comparing the cached TSBar position with the
         // current one since if it is broken, likely everything else is as well.
         private void FixAllComponentPositions() {
-            if (!tsBar.position.Equals(tsBarCachedPos)) {
-                //DebugMsg("FIXALL | tsBar: " + tsBar.position.ToString() + " | tsBar_cached: " + tsBarCachedPos.ToString());
-                foreach (var c in allUIComponents) {
-                    if (c != null) { // For some reason, FindObjectsOfType() returns a handful of null results
-                        int iid = c.GetInstanceID();
-                        if (allUIComponentsCache.TryGetValue(iid, out Vector3 cachedPos)) {
-                            c.position = cachedPos;
+            try {
+                if (!tsBar.position.Equals(tsBarCachedPos)) {
+                    DebugMsg("FIXALL | tsBar: " + tsBar.position.ToString() + " | tsBar_cached: " + tsBarCachedPos.ToString());
+                    foreach (var c in allUIComponents) {
+                        if (c != null) { // For some reason, FindObjectsOfType() returns a handful of null results
+                            int iid = c.GetInstanceID();
+                            if (allUIComponentsCache.TryGetValue(iid, out Vector3 cachedPos)) {
+                                c.position = cachedPos;
+                            }
                         }
                     }
-                }
-                FixEverything(); // Have to apply fixes again
+                    FixEverything(); // Have to apply fixes again
+                } 
+            } catch (Exception ex) {
+                DebugMsg("ScaleUI: " + ex.ToString());
             }
         }
         
         // The close button on the TSBar sometimes stubbornly refuses to
         // disappear, so we hide it each time the bottom bar is clicked. 
         private void HideCloseButton(UIComponent component, UIMouseEventParameter eventParam) {
-            UIComponent tsBar = GameObject.Find("TSBar").GetComponent<UIComponent>();
-            tsBar.position = new Vector3(50f, 50f);
             tsCloseButton.position = new Vector3(-1000.0f, -1000.0f);
         }
         
@@ -220,37 +210,34 @@ namespace ScaleUI {
         private void CacheLinePositions() {
             try {
                 numTransportLines = Singleton<TransportManager>.instance.m_lines.ItemCount();
-                UIComponent[] ltExampleChildren =
-                    GameObject.Find("LineTemplate(Clone)").GetComponent<UIComponent>().GetComponentsInChildren<UIComponent>();
-                foreach (var c in ltExampleChildren) {
-                    String s = c.name;
-                    if (!ltChildPositionsCache.ContainsKey(s)) {
-                        ltChildPositionsCache.Add(s, new Vector3(c.position.x, c.position.y, c.position.z));
+                if (numTransportLines > 2) {
+                    UIComponent[] lineTemplateChildren = 
+                        GameObject.Find("LineTemplate(Clone)").GetComponent<UIComponent>().GetComponentsInChildren<UIComponent>();
+                    foreach (var c in lineTemplateChildren) {
+                        ltChildPositionsCache[c.name] = new Vector3(c.position.x, c.position.y, c.position.z);
                     }
+                    isLinePositionsCached = true;
                 }
-                isLinePositionsCached = true;
-            } catch (Exception ex) { 
+            } catch (Exception ex) {
+                DebugMsg("ScaleUI: " + ex.ToString());
             }
         }
         
         private void CacheAllUIComponents() {
-            foreach (var c in allUIComponents) {
-                if (c != null) { // For some reason, FindObjectsOfType() returns a handful of null results
-                    allUIComponentsCache[c.GetInstanceID()] = new Vector3(c.position.x, c.position.y, c.position.z);
-                } 
+            try {
+                foreach (var c in allUIComponents) {
+                    if (c != null) { // For some reason, FindObjectsOfType() returns a handful of null results
+                        allUIComponentsCache[c.GetInstanceID()] = new Vector3(c.position.x, c.position.y, c.position.z);
+                    }
+                }
+                tsBarCachedPos = new Vector3(tsBar.position.x, tsBar.position.y, tsBar.position.z);
+            } catch (Exception ex) {
+                DebugMsg("ScaleUI: " + ex.ToString());
             }
-            tsBarCachedPos = new Vector3(tsBar.position.x, tsBar.position.y, tsBar.position.z);
         }
 
-       private void LogAllComponents() {
-            var components = UnityEngine.Object.FindObjectsOfType<UIComponent>();
-            foreach (var c in components) {
-                Debug.Log("Comp: " + c.ToString());
-            }
-        } 
-
         private void DebugMsg(String s) {
-            DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, s);
+            DebugOutputPanel.AddMessage(PluginManager.MessageType.Error, s);
         }
     }
 }
