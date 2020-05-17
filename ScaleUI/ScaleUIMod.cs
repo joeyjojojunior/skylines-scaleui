@@ -1,13 +1,11 @@
 using ICities;
 using ColossalFramework.UI;
-using ColossalFramework.Plugins;
-
 
 namespace ScaleUI {
     public class ScaleUIMod : IUserMod {
         public string Name => "ScaleUI ";
         public string Description => "Adds slider in options to scale the UI.";
-
+        
         private const float MIN_SCALE = 0.4f;
         private const float MAX_SCALE = 1.4f;
         private const float INCR_SCALE = 0.05f;
@@ -27,9 +25,11 @@ namespace ScaleUI {
             scaleText.hoveredBgSprite = "";
 
             UISlider scaleSlider = (UISlider) group.AddSlider(" ", MIN_SCALE, MAX_SCALE, INCR_SCALE, selectedValue, sel => {
+                scaleText.text = sel.ToString();
+                // For some reason 0.55 scale causes massive slow-down when opening roads panel
+                if (sel == 0.55f) sel -= 0.01f;
                 ModConfig.Instance.scale = sel;
                 ModConfig.Instance.Save();
-                scaleText.text = sel.ToString();
             });
 
             group.AddButton("Apply", () => {
