@@ -1,6 +1,8 @@
 using ICities;
 using System;
 using UnityEngine;
+using ColossalFramework.Plugins;
+using System.Linq;
 
 namespace ScaleUI {
     public class ScaleUILoader : LoadingExtensionBase {
@@ -21,9 +23,10 @@ namespace ScaleUI {
 
         public override void OnLevelUnloading() {
             try {
-                GameObject.Destroy(go);
+               GameObject.Destroy(go);
             } catch (Exception ex) {
-                DebugOutputPanel.AddMessage(ColossalFramework.Plugins.PluginManager.MessageType.Error, "ScaleUI: " + ex.ToString());
+                DebugOutputPanel.AddMessage(
+                    ColossalFramework.Plugins.PluginManager.MessageType.Error, "ScaleUI: " + ex.ToString());
             }
         }
     }

@@ -12,7 +12,6 @@ namespace ScaleUI {
         private bool isLinePositionsCached;
         private uint numTransportLines;
         private float thumbnailbarY = 0f;
-        private float lastScale;
 
         private UIView uiView;
         private UIComponent thumbnailBar;
@@ -32,17 +31,12 @@ namespace ScaleUI {
         // Used to fix transport line panel breaking
         private Dictionary<String, Vector3> ltChildPositionCache;
         
-        // Used to fix mod button position breaking
-        private Dictionary<UIComponent, Vector3> modPosCache;
-
-        
         public void Update() {
-            if (!isInitialized) InitModCache(); 
-
             if (!isInitialized || ModConfig.Instance.isApplyBtn) {
+                // For some reason 0.55 scale causes massive slow-down when opening roads panel
+                if (ModConfig.Instance.scale == 0.55f) ModConfig.Instance.scale -= 0.001f;
                 ChangeScale(ModConfig.Instance.scale);
                 ModConfig.Instance.isApplyBtn = false;
-                lastScale = ModConfig.Instance.scale;
                 isInitialized = true;
             }
 
@@ -50,8 +44,6 @@ namespace ScaleUI {
                 ChangeScale(1f);
                 ModConfig.Instance.isResetBtn = false;
             }
-
-            if (lastScale == ModConfig.Instance.scale) CacheModPositions();
 
             FixLinesOverview();
             FixAllComponentPositions();
@@ -71,8 +63,6 @@ namespace ScaleUI {
                 allUIComponentsCache = new Dictionary<int, Vector3>();
                 tsBar = GameObject.Find("TSBar").GetComponent<UIComponent>();
                 ltChildPositionCache = new Dictionary<string, Vector3>();
-                modPosCache = new Dictionary<UIComponent, Vector3>();
-                lastScale = ModConfig.Instance.scale;
                 UIComponent tsContainer = GameObject.Find("TSContainer").GetComponent<UIComponent>();
                 tsContainer.eventClicked += new MouseEventHandler(HideCloseButton);
                 FixEverything();
@@ -80,15 +70,12 @@ namespace ScaleUI {
                 DebugMsg("ScaleUI: " + ex.ToString());
             }
         }
-
+              
         public void ChangeScale(float scale) {
-            DebugMsg("scale: " + scale.ToString());
             uiView.scale = scale;
             CacheLinePositions();
             CacheAllUIComponents();
             FixEverything();
-            FixModPositions();
-            lastScale = scale;
         }
 
         private void FixEverything() {
@@ -107,13 +94,11 @@ namespace ScaleUI {
         }
 
         private void FixCamera() {
-            if (uiView.scale < 1.0f) {
+            if (uiView.scale < 1.0f) 
                 MakeCameraFullscreen.Initialize();
-            } else {
-                if (MakeCameraFullscreen.cameraControllerRedirected) {
+            else 
+                if (MakeCameraFullscreen.cameraControllerRedirected) 
                     MakeCameraFullscreen.Deinitialize();
-                }
-            }
         }
 
         private void FixPauseBorder() {
@@ -142,7 +127,7 @@ namespace ScaleUI {
             const float OFFSET_Y = 3.0f;
             if (disasterWarnPanel != null) {
                 disasterWarnPanel.transformPosition = new Vector2(fullscreenContainer.GetBounds().min.x, fullscreenContainer.GetBounds().max.y);
-                disasterWarnPanel.relativePosition += new Vector3(OFFSET_X, OFFSET_Y); // won't stick without doing it twice
+                disasterWarnPanel.relativePosition += new Vector3(OFFSET_X, OFFSET_Y); // Won't stick without doing it twice.
                 disasterWarnPanel.relativePosition += new Vector3(OFFSET_X, OFFSET_Y);
             }
         }
@@ -159,33 +144,11 @@ namespace ScaleUI {
             tsCloseButton.position = new Vector3(-1000.0f, -1000.0f);
         }
     
-        private void InitModCache() {
-            UIComponent[] mods = {
-                    GameObject.Find("MoveIt").GetComponent<UIComponent>(),
-                    GameObject.Find("MainMenuButton").GetComponent<UIComponent>() // TMPE
-            };
-
-            foreach (var c in mods) 
-                if (c != null && !modPosCache.ContainsKey(c)) 
-                    modPosCache.Add(c, c.absolutePosition * ModConfig.Instance.scale);
-        }
-        
-        private void CacheModPositions() {
-            foreach (var k in modPosCache.Keys.ToList()) 
-                modPosCache[k] = k.absolutePosition * ModConfig.Instance.scale;
-        }
-        private void FixModPositions() {
-            foreach (var e in modPosCache) 
-                if (e.Key != null)
-                    e.Key.absolutePosition = e.Value / ModConfig.Instance.scale;
-        }
-
         // Find an example transport line UIPanel with known good spacing 
-        // and save the position of all its children .
+        // and save the position of all its children.
         private void CacheLinePositions() {
             try {
-                numTransportLines = Singleton<TransportManager>.instance.m_lines.ItemCount();
-                if (numTransportLines > 2) {
+                if (Singleton<TransportManager>.instance.m_lines.ItemCount() > 2) {
                     UIComponent[] lineTemplateChildren = 
                         GameObject.Find("LineTemplate(Clone)").GetComponent<UIComponent>().GetComponentsInChildren<UIComponent>();
                     foreach (var c in lineTemplateChildren) 
@@ -196,9 +159,7 @@ namespace ScaleUI {
                 DebugMsg("ScaleUI: " + ex.ToString());
             }
         }
-
-        // If a new line was added, update the position of all its UIComponent
-        // children  to the known good positions we saved earlier in our dict
+       
         private void FixLinesOverview() {
             uint currNumLines = Singleton<TransportManager>.instance.m_lines.ItemCount();
 
@@ -211,6 +172,8 @@ namespace ScaleUI {
                 ChangeScale(oldScale);
             }
 
+            // If a new line was added, update the position of all its UIComponent
+            // children  to the known good positions we saved earlier 
             if (currNumLines > numTransportLines) 
                 foreach (var p in GameObject.FindObjectsOfType<UIPanel>()) 
                     if (p.name == "LineTemplate(Clone)") 
